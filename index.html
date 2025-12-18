@@ -1,1107 +1,1862 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIF Token - Hong Kong AI International Film Festival</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    
+    <title>AIFID - Unified Identity System</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Inter"', 'sans-serif'],
-                        mono: ['"Space Mono"', 'monospace'],
-                    },
-                    colors: {
-                        black: '#1a1a1a', 
-                        white: '#ffffff',
-                        offwhite: '#f9f9f9',
-                        gray: {
-                            100: '#f3f3f3',
-                            200: '#e5e5e5',
-                            400: '#a3a3a3',
-                            500: '#737373',
-                            900: '#111111'
-                        },
-                        accent: '#1a1a1a', 
-                    }
-                }
-            }
-        }
-    </script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
-        /* Base & Reset */
-        body {
-            background-color: #ffffff;
-            color: #1a1a1a;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* Academy Button Style */
-        .academy-btn {
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-        .academy-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        /* Reveal Animation */
-        .reveal-text { opacity: 0; transform: translateY(20px); transition: all 0.6s ease-out; }
-        .reveal-text.active { opacity: 1; transform: translateY(0); }
-
-        /* Language Toggle Logic */
-        .lang-zh, .lang-en { display: none !important; }
-        .lang-zh.active, .lang-en.active { display: block !important; }
-        span.lang-zh.active, span.lang-en.active { display: inline !important; }
-        
-        /* Mobile Menu Overlay */
-        .mobile-menu-overlay {
-            background: rgba(255,255,255,0.98);
-            backdrop-filter: blur(5px);
-        }
-        
-        /* Compliance Modal Overlay */
-        .compliance-overlay {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px);
-        }
-
-        /* Custom Checkbox */
-        .custom-checkbox {
-            appearance: none;
-            background-color: #fff;
+        * { 
+            font-family: 'Inter', sans-serif;
             margin: 0;
-            font: inherit;
-            color: currentColor;
-            width: 1.15em;
-            height: 1.15em;
-            border: 1px solid currentColor;
-            border-radius: 0.15em;
-            display: grid;
-            place-content: center;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .font-mono { font-family: 'Space Mono', monospace; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e5e5e5; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #999; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .submenu { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .submenu.open { max-height: 500px; }
+        
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        @keyframes scan {
+            0%, 100% { top: 0; }
+            50% { top: 100%; }
+        }
+        
+        @media (max-width: 1024px) {
+            #sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+            #sidebar.open { transform: translateX(0); }
+        }
+
+        .did-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 1.586;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-pattern {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, transparent 100%);
+            border-radius: 50% 0 0 50%;
+        }
+
+        .card-pattern::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            right: 10%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .matrix-node {
+            background: white;
+            border: 2px solid #e5e5e5;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
             cursor: pointer;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
-        .custom-checkbox::before {
-            content: "";
-            width: 0.65em;
-            height: 0.65em;
-            transform: scale(0);
-            transition: 120ms transform ease-in-out;
-            box-shadow: inset 1em 1em #1a1a1a;
-            background-color: #1a1a1a;
-            transform-origin: center;
-            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        .matrix-node:hover {
+            border-color: #000;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
         }
 
-        .custom-checkbox:checked::before {
-            transform: scale(1);
+        .matrix-node.filled {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .matrix-node.captain {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border-color: #FFA500;
+            color: #000;
+        }
+
+        .matrix-node.super {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .node-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .node-stats {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .transaction-item {
+            background: white;
+            border: 2px solid #e5e5e5;
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .transaction-item:hover {
+            border-color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        .asset-card {
+            background: white;
+            border: 2px solid #e5e5e5;
+            border-radius: 20px;
+            padding: 28px;
+            transition: all 0.3s;
+        }
+
+        .asset-card:hover {
+            border-color: #000;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+        }
+
+        .asset-card.highlight {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #000;
+            border-color: #FFA500;
         }
     </style>
 </head>
-<body class="bg-white text-black selection:bg-black selection:text-white overflow-hidden" id="mainBody">
+<body class="bg-gray-50 text-gray-900 overflow-hidden">
 
-    <div id="complianceModal" class="fixed inset-0 z-[100] compliance-overlay flex items-center justify-center p-4">
-        <div class="bg-white border border-black shadow-2xl rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto flex flex-col relative">
-            
-            <div class="absolute top-6 right-6 z-10">
-                <button onclick="toggleLanguage()" class="text-xs font-mono border border-gray-200 px-3 py-1.5 rounded-full hover:bg-black hover:text-white transition-all uppercase flex items-center gap-2">
-                    <i class="fas fa-globe"></i>
-                    <span class="lang-en active">EN</span><span class="lang-zh">繁體</span>
+    <!-- LOGIN VIEW -->
+    <div id="login-view" class="fixed inset-0 z-50 bg-white flex items-center justify-center p-6">
+        <div class="w-full max-w-md">
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center gap-3 mb-6">
+                    <div class="w-16 h-16 bg-black text-white flex items-center justify-center font-black text-2xl rounded-2xl">ID</div>
+                    <span class="text-3xl font-black">AIFID</span>
+                </div>
+                <h1 class="text-5xl font-black mb-3" data-i18n="login.title">Unified Access</h1>
+                <p class="text-gray-500" data-i18n="login.subtitle">Connect to the Ecosystem</p>
+            </div>
+
+            <div class="space-y-4 mb-8">
+                <button onclick="connectWallet('walletconnect')" class="w-full p-6 border-2 border-gray-200 rounded-2xl hover:border-black hover:bg-gray-50 transition-all flex items-center justify-between group">
+                    <span class="font-bold text-lg flex items-center gap-4">
+                        <i class="fas fa-wallet text-4xl text-blue-500"></i>
+                        WalletConnect
+                    </span>
+                    <i class="fas fa-arrow-right opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                </button>
+
+                <button onclick="connectWallet('email')" class="w-full p-6 bg-black text-white rounded-2xl font-black text-lg hover:bg-gray-900 transition-all flex items-center justify-center gap-3">
+                    <i class="fas fa-envelope text-2xl"></i>
+                    <span data-i18n="login.magic">Magic Link</span>
                 </button>
             </div>
 
-            <div class="p-8 md:p-10">
-                <div class="text-center mb-8">
-                    <div class="inline-block p-3 rounded-full bg-black text-white mb-4 text-xl">
-                        <i class="fas fa-shield-alt"></i>
+            <div class="mt-8 text-center">
+                <button onclick="toggleLanguage()" class="text-sm text-gray-500 hover:text-black font-bold">
+                    <i class="fas fa-language mr-2"></i>
+                    <span id="lang-btn">EN / 繁</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONNECTING OVERLAY -->
+    <div id="connecting-overlay" class="fixed inset-0 z-[60] bg-black text-white hidden flex-col items-center justify-center">
+        <div class="spinner mb-8"></div>
+        <h2 class="text-3xl font-black mb-8" data-i18n="connecting.title">Connecting ID</h2>
+        <div class="space-y-4 font-mono text-sm">
+            <div id="step-1" class="flex items-center gap-3"><i class="fas fa-circle-notch fa-spin"></i><span data-i18n="connecting.step1">Requesting signature...</span></div>
+            <div id="step-2" class="flex items-center gap-3"><i class="fas fa-circle-notch fa-spin"></i><span data-i18n="connecting.step2">Verifying identity...</span></div>
+            <div id="step-3" class="flex items-center gap-3"><i class="fas fa-circle-notch fa-spin"></i><span data-i18n="connecting.step3">Creating session...</span></div>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="app-shell" class="hidden w-full h-screen flex">
+        
+        <!-- SIDEBAR -->
+        <aside id="sidebar" class="w-80 bg-white border-r-2 border-gray-200 flex flex-col h-full lg:relative absolute z-40">
+            
+            <div class="p-6 border-b-2 border-gray-200">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center text-lg font-black">ID</div>
+                    <div>
+                        <h2 class="font-black text-lg">COMMANDER</h2>
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                            <span class="text-gray-500 font-bold" data-i18n="sidebar.connected">Connected</span>
+                        </div>
                     </div>
-                    <h2 class="text-2xl font-bold mb-2">
-                        <span class="lang-zh">重要聲明</span>
-                        <span class="lang-en active">Important Disclaimer</span>
-                    </h2>
-                    <div class="h-1 w-16 bg-black mx-auto"></div>
                 </div>
-
-                <div class="text-sm text-gray-600 mb-8 leading-relaxed text-center space-y-2">
-                    <p>
-                        <span class="lang-zh">您即將進入 HKAIIFF 數字資產服務區域。</span>
-                        <span class="lang-en active">You are about to enter the HKAIIFF Digital Asset Service Area.</span>
-                    </p>
-                    <p class="font-medium text-black">
-                        <span class="lang-zh">本服務由香港主體提供，受香港法律管辖。</span>
-                        <span class="lang-en active">This service is provided by a Hong Kong entity and is subject to Hong Kong laws.</span>
-                    </p>
+                <div class="bg-gray-50 border-2 border-gray-200 rounded-xl p-3">
+                    <div class="text-[9px] text-gray-400 uppercase mb-1" data-i18n="sidebar.mainWallet">Main Wallet</div>
+                    <div class="font-mono text-xs font-bold">0x742d...bEb1</div>
                 </div>
+            </div>
 
-                <div class="space-y-4 mb-8">
-                    <p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
-                        <span class="lang-zh">請確認：</span>
-                        <span class="lang-en active">Please Confirm:</span>
-                    </p>
+            <nav class="flex-1 overflow-y-auto p-4 space-y-6">
+                
+                <!-- CORE SYSTEM -->
+                <div>
+                    <div class="px-3 mb-3 text-[9px] font-black text-gray-400 uppercase" data-i18n="sidebar.coreSystem">Core System</div>
                     
-                    <label class="flex items-start gap-3 cursor-pointer group">
-                        <input type="checkbox" class="custom-checkbox mt-0.5 compliance-check">
-                        <span class="text-sm group-hover:text-black text-gray-600 transition-colors">
-                            <span class="lang-zh">本人非中國大陸居民</span>
-                            <span class="lang-en active">I am not a resident of Mainland China</span>
-                        </span>
-                    </label>
+                    <div class="mb-2">
+                        <button onclick="toggleSubmenu('genesis')" class="w-full text-left px-3 py-3 rounded-xl hover:bg-gray-50 transition-all border-2 border-transparent hover:border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-rocket text-gray-600"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-black">GEN</div>
+                                        <div class="text-[9px] text-gray-400" data-i18n="sidebar.genesis">Genesis</div>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-down text-xs text-gray-400 rotate-180" id="arrow-genesis"></i>
+                            </div>
+                        </button>
+                        
+                        <div id="submenu-genesis" class="submenu open pl-10 mt-2 space-y-1">
+                            <button onclick="switchView('purchase')" id="nav-purchase" class="w-full text-left py-2 px-3 rounded-lg text-sm font-bold bg-gray-100" data-i18n="sidebar.getAIF">Get AIF</button>
+                            <button onclick="switchView('captain')" id="nav-captain" class="w-full text-left py-2 px-3 rounded-lg text-sm font-bold text-gray-500 hover:bg-gray-100" data-i18n="sidebar.captain">Captain</button>
+                            <button onclick="switchView('settlement')" id="nav-settlement" class="w-full text-left py-2 px-3 rounded-lg text-sm font-bold text-gray-500 hover:bg-gray-100" data-i18n="sidebar.settlement">Settlement</button>
+                        </div>
+                    </div>
 
-                    <label class="flex items-start gap-3 cursor-pointer group">
-                        <input type="checkbox" class="custom-checkbox mt-0.5 compliance-check">
-                        <span class="text-sm group-hover:text-black text-gray-600 transition-colors">
-                            <span class="lang-zh">本人非美國公民或居民</span>
-                            <span class="lang-en active">I am not a U.S. citizen or resident</span>
-                        </span>
-                    </label>
-
-                    <label class="flex items-start gap-3 cursor-pointer group">
-                        <input type="checkbox" class="custom-checkbox mt-0.5 compliance-check">
-                        <span class="text-sm group-hover:text-black text-gray-600 transition-colors">
-                            <span class="lang-zh">本人通過自有境外資產參與</span>
-                            <span class="lang-en active">I am participating using my own offshore assets</span>
-                        </span>
-                    </label>
-
-                    <label class="flex items-start gap-3 cursor-pointer group">
-                        <input type="checkbox" class="custom-checkbox mt-0.5 compliance-check">
-                        <span class="text-sm group-hover:text-black text-gray-600 transition-colors">
-                            <span class="lang-zh">本人知悉數字資產參與風險</span>
-                            <span class="lang-en active">I am aware of the risks involved in digital asset participation</span>
-                        </span>
-                    </label>
-
-                    <label class="flex items-start gap-3 cursor-pointer group">
-                        <input type="checkbox" class="custom-checkbox mt-0.5 compliance-check">
-                        <span class="text-sm group-hover:text-black text-gray-600 transition-colors">
-                            <span class="lang-zh">本人自願承擔全部參與風險</span>
-                            <span class="lang-en active">I voluntarily assume all participation risks</span>
-                        </span>
-                    </label>
-                </div>
-
-                <div class="space-y-4">
-                    <button id="complianceBtn" disabled onclick="acceptCompliance()" class="w-full bg-black text-white py-4 rounded-xl font-bold text-sm tracking-wide disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-900 transition-all transform hover:-translate-y-1">
-                        <span class="lang-zh">確認並進入</span>
-                        <span class="lang-en active">Confirm & Enter</span>
+                    <button onclick="switchView('did')" id="nav-did" class="w-full text-left px-3 py-3 rounded-xl hover:bg-gray-50 transition-all border-2 border-transparent hover:border-gray-200 mb-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-id-card text-gray-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-black">DID</div>
+                                <div class="text-[9px] text-gray-400" data-i18n="sidebar.identity">Identity</div>
+                            </div>
+                        </div>
                     </button>
+
+                    <button onclick="switchView('wallet')" id="nav-wallet" class="w-full text-left px-3 py-3 rounded-xl hover:bg-gray-50 transition-all border-2 border-transparent hover:border-gray-200">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-wallet text-gray-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-black">WAL</div>
+                                <div class="text-[9px] text-gray-400" data-i18n="sidebar.assets">Assets</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- ECOSYSTEM -->
+                <div>
+                    <div class="px-3 mb-3 text-[9px] font-black text-gray-400 uppercase" data-i18n="sidebar.ecosystem">Ecosystem</div>
                     
-                    <p class="text-[10px] text-center text-gray-400">
-                        <span class="lang-zh">我已閱讀並同意《用戶協議》《風險提示書》</span>
-                        <span class="lang-en active">I have read and agree to the "User Agreement" and "Risk Disclosure Statement"</span>
-                    </p>
+                    <button onclick="activateModule('hkaifa')" id="nav-hkaifa" class="w-full text-left px-3 py-3 rounded-xl hover:bg-gray-100 transition-all mb-2">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-graduation-cap text-gray-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-sm">HKAIFA</div>
+                                    <div class="text-[8px] text-gray-400" data-i18n="sidebar.academy">Academy</div>
+                                </div>
+                            </div>
+                            <i class="fas fa-lock text-xs text-gray-400 module-lock"></i>
+                            <i class="fas fa-check-circle text-xs text-green-500 module-check hidden"></i>
+                        </div>
+                    </button>
+
+                    <button onclick="showToast('Module locked', 'warning')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 opacity-50 mb-1">
+                        <div class="flex items-center justify-between text-xs">
+                            <span><i class="fas fa-store mr-2"></i>HKAIFM</span>
+                            <i class="fas fa-lock text-[10px]"></i>
+                        </div>
+                    </button>
+
+                    <button onclick="showToast('Module locked', 'warning')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 opacity-50 mb-1">
+                        <div class="flex items-center justify-between text-xs">
+                            <span><i class="fas fa-film mr-2"></i>CENTER</span>
+                            <i class="fas fa-lock text-[10px]"></i>
+                        </div>
+                    </button>
+
+                    <button onclick="showToast('Module locked', 'warning')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 opacity-50 mb-1">
+                        <div class="flex items-center justify-between text-xs">
+                            <span><i class="fas fa-ticket-alt mr-2"></i>HKAIIFF</span>
+                            <i class="fas fa-lock text-[10px]"></i>
+                        </div>
+                    </button>
+
+                    <button onclick="showToast('Module locked', 'warning')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 opacity-50 mb-1">
+                        <div class="flex items-center justify-between text-xs">
+                            <span><i class="fas fa-gift mr-2"></i>GIFTS</span>
+                            <i class="fas fa-lock text-[10px]"></i>
+                        </div>
+                    </button>
+
+                    <button onclick="showToast('Module locked', 'warning')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 opacity-50 mb-1">
+                        <div class="flex items-center justify-between text-xs">
+                            <span><i class="fas fa-database mr-2"></i>MERKLE</span>
+                            <i class="fas fa-lock text-[10px]"></i>
+                        </div>
+                    </button>
+
+                    <button onclick="showToast('Module locked', 'warning')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 opacity-50 mb-1">
+                        <div class="flex items-center justify-between text-xs">
+                            <span><i class="fas fa-users mr-2"></i>AIFCLUB</span>
+                            <i class="fas fa-lock text-[10px]"></i>
+                        </div>
+                    </button>
+
+                    <button onclick="showToast('Module locked', 'warning')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 opacity-50 mb-1">
+                        <div class="flex items-center justify-between text-xs">
+                            <span><i class="fas fa-robot mr-2"></i>BEINGOS</span>
+                            <i class="fas fa-lock text-[10px]"></i>
+                        </div>
+                    </button>
+
+                    <button onclick="showToast('Module locked', 'warning')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 opacity-50">
+                        <div class="flex items-center justify-between text-xs">
+                            <span><i class="fas fa-vr-cardboard mr-2"></i>404WORLD</span>
+                            <i class="fas fa-lock text-[10px]"></i>
+                        </div>
+                    </button>
+                </div>
+            </nav>
+
+            <div class="p-4 border-t-2 border-gray-200">
+                <button onclick="toggleLanguage()" class="w-full py-2 px-3 rounded-lg hover:bg-gray-50 text-sm font-bold text-gray-600 mb-2">
+                    <i class="fas fa-language mr-2"></i><span id="sidebar-lang">EN / 繁</span>
+                </button>
+                <button onclick="logout()" class="w-full py-2 px-3 rounded-lg hover:bg-gray-50 text-sm font-bold text-gray-600">
+                    <i class="fas fa-sign-out-alt mr-2"></i><span data-i18n="sidebar.disconnect">Disconnect</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 overflow-y-auto bg-gray-50">
+            <div class="sticky top-0 z-30 bg-white border-b-2 border-gray-200 px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-sm font-mono text-gray-500">
+                    <span id="breadcrumb" data-i18n="breadcrumb.genesis">Genesis</span>
+                    <i class="fas fa-chevron-right text-xs"></i>
+                    <span class="text-black font-bold" id="breadcrumb-sub" data-i18n="breadcrumb.purchase">Purchase</span>
+                </div>
+                <button onclick="toggleSidebar()" class="lg:hidden w-10 h-10 border-2 border-gray-200 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <div class="p-6" id="content-container"></div>
+        </main>
+    </div>
+
+    <!-- REFERRAL MODAL -->
+    <div id="referral-modal" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-6">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 relative">
+            <button onclick="closeReferralModal()" class="absolute top-6 right-6 w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-share-nodes text-white text-3xl"></i>
+                </div>
+                <h2 class="text-3xl font-black mb-2" data-i18n="modal.referralTitle">Your Referral Link</h2>
+                <p class="text-gray-600 text-sm" id="referral-slot-info">SLOT A1</p>
+            </div>
+
+            <div class="bg-gray-50 rounded-2xl p-4 mb-6">
+                <div class="text-xs text-gray-500 mb-2" data-i18n="modal.shareLink">Share this link:</div>
+                <div class="flex gap-2">
+                    <input type="text" id="referral-link" readonly class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl font-mono text-sm bg-white">
+                    <button onclick="copyReferralLink()" class="px-6 bg-black hover:bg-gray-800 text-white rounded-xl font-bold">
+                        <i class="fas fa-copy"></i>
+                    </button>
                 </div>
             </div>
+
+            <div class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 mb-6">
+                <div class="font-bold mb-2"><i class="fas fa-info-circle text-blue-600 mr-2"></i><span data-i18n="modal.howItWorks">How it works:</span></div>
+                <ul class="text-sm text-gray-700 space-y-1">
+                    <li data-i18n="modal.step1">• Share link with friends</li>
+                    <li data-i18n="modal.step2">• They connect wallet & purchase</li>
+                    <li data-i18n="modal.step3">• Auto-bind to your slot</li>
+                    <li data-i18n="modal.step4">• You earn commission instantly</li>
+                </ul>
+            </div>
+
+            <button onclick="closeReferralModal()" class="w-full py-4 bg-black text-white rounded-xl font-bold" data-i18n="modal.gotIt">
+                Got it!
+            </button>
         </div>
     </div>
 
-    <nav class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 transition-all duration-300">
-        <div class="px-6 md:px-8 py-4 flex justify-between items-center max-w-[1920px] mx-auto">
-            <a href="#home" class="flex items-center gap-3 group">
-                <img src="logo.jpeg" alt="AIF Logo" class="w-10 h-10 rounded-lg grayscale group-hover:grayscale-0 transition-all">
-                <div class="flex flex-col leading-none">
-                    <span class="text-lg font-bold tracking-tight font-mono">AIF Token.</span>
-                    <span class="text-[0.6rem] font-mono uppercase tracking-wider text-gray-500 group-hover:text-black transition-colors">
-                        <span class="lang-zh">AI影视算力通证</span><span class="lang-en active">AI Film Token</span>
-                    </span>
+    <!-- PAYMENT MODAL -->
+    <div id="payment-modal" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-6">
+        <div class="bg-white rounded-3xl max-w-3xl w-full p-8 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closePaymentModal()" class="absolute top-6 right-6 w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-shopping-cart text-white text-3xl"></i>
                 </div>
-            </a>
-
-            <div class="hidden xl:flex items-center gap-1 text-[13px] font-medium tracking-wide">
-                <a href="#ecosystem" class="px-3 py-2 rounded-full hover:bg-gray-100 transition-colors"><span class="lang-zh">生態系統</span><span class="lang-en active">Ecosystem</span></a>
-                <a href="#about-aif" class="px-3 py-2 rounded-full hover:bg-gray-100 transition-colors"><span class="lang-zh">關於AIF</span><span class="lang-en active">About AIF</span></a>
-                <a href="#phantom-wallet" class="px-3 py-2 rounded-full hover:bg-gray-100 transition-colors"><span class="lang-zh">Phantom錢包</span><span class="lang-en active">Phantom Wallet</span></a>
-                <a href="#tokenomics" class="px-3 py-2 rounded-full hover:bg-gray-100 transition-colors"><span class="lang-zh">通證模型</span><span class="lang-en active">Tokenomics</span></a>
-                <a href="#invitation" class="px-3 py-2 rounded-full hover:bg-gray-100 transition-colors"><span class="lang-zh">邀請制釋放</span><span class="lang-en active">Invitation Release</span></a>
-                <a href="#genesis-invitation" class="px-3 py-2 rounded-full hover:bg-gray-100 transition-colors"><span class="lang-zh">創世邀請</span><span class="lang-en active">Genesis Invitation</span></a>
-                <a href="#roadmap" class="px-3 py-2 rounded-full hover:bg-gray-100 transition-colors"><span class="lang-zh">路線圖</span><span class="lang-en active">Roadmap</span></a>
-                <a href="#whitepaper" onclick="openWhitepaperModal(); return false;" class="px-3 py-2 rounded-full hover:bg-gray-100 transition-colors"><span class="lang-zh">白皮書</span><span class="lang-en active">Whitepaper</span></a>
+                <h2 class="text-3xl font-black mb-2" data-i18n="payment.title">Complete Purchase</h2>
+                <p class="text-gray-600" data-i18n="payment.package">AIF Genesis Package - $600.00</p>
             </div>
 
-            <div class="flex items-center gap-4">
-                <button onclick="toggleLanguage()" class="hidden md:flex items-center gap-2 text-xs font-mono border border-gray-200 px-3 py-1.5 rounded-full hover:bg-black hover:text-white transition-all uppercase">
-                    <i class="fas fa-globe"></i>
-                    <span id="current-lang-text">EN</span>
-                </button>
-
-                <a href="https://wise.com/pay/r/YgePWEvx0Jo_i8I" target="_blank" class="bg-black text-white text-[13px] font-medium px-6 py-3 rounded-full academy-btn flex items-center gap-2">
-                    <i class="fas fa-shopping-cart text-xs"></i>
-                    <span class="lang-zh">獲取 AIF</span><span class="lang-en active">Acquire AIF</span>
-                </a>
-
-                <button class="xl:hidden text-black" onclick="toggleMobileMenu()">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <div id="mobileMenu" class="fixed inset-0 z-[60] mobile-menu-overlay hidden flex-col p-6 overflow-y-auto">
-        <div class="flex justify-between items-center mb-8">
-            <span class="font-bold text-lg">Menu</span>
-            <button onclick="toggleMobileMenu()" class="text-2xl"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="flex flex-col gap-4 text-lg font-medium">
-            <a href="https://wise.com/pay/r/YgePWEvx0Jo_i8I" target="_blank" class="bg-black text-white p-4 rounded-xl text-center mb-4">
-                <i class="fas fa-shopping-cart mr-2"></i><span class="lang-zh">獲取 AIF</span><span class="lang-en active">Acquire AIF</span>
-            </a>
-            
-            <a href="#ecosystem" onclick="toggleMobileMenu()" class="border-b border-gray-100 pb-3"><span class="lang-zh">生態系統</span><span class="lang-en active">Ecosystem</span></a>
-            <a href="#about-aif" onclick="toggleMobileMenu()" class="border-b border-gray-100 pb-3"><span class="lang-zh">關於AIF</span><span class="lang-en active">About AIF</span></a>
-            <a href="#phantom-wallet" onclick="toggleMobileMenu()" class="border-b border-gray-100 pb-3"><span class="lang-zh">Phantom錢包</span><span class="lang-en active">Phantom Wallet</span></a>
-            <a href="#tokenomics" onclick="toggleMobileMenu()" class="border-b border-gray-100 pb-3"><span class="lang-zh">通證模型</span><span class="lang-en active">Tokenomics</span></a>
-            <a href="#invitation" onclick="toggleMobileMenu()" class="border-b border-gray-100 pb-3"><span class="lang-zh">邀請制釋放</span><span class="lang-en active">Invitation Release</span></a>
-            <a href="#genesis-invitation" onclick="toggleMobileMenu()" class="border-b border-gray-100 pb-3"><span class="lang-zh">創世邀請計劃</span><span class="lang-en active">Genesis Invitation</span></a>
-            <a href="#roadmap" onclick="toggleMobileMenu()" class="border-b border-gray-100 pb-3"><span class="lang-zh">路線圖</span><span class="lang-en active">Roadmap</span></a>
-            <a href="#" onclick="openWhitepaperModal(); toggleMobileMenu(); return false;" class="border-b border-gray-100 pb-3"><span class="lang-zh">白皮書</span><span class="lang-en active">Whitepaper</span></a>
-            
-            <div class="pt-4 mt-2">
-                <button onclick="toggleLanguage();" class="flex items-center gap-2 text-sm font-mono uppercase bg-gray-100 px-4 py-2 rounded-lg w-full justify-center">
-                    <img src="https://flagcdn.com/w40/gb.png" class="w-5 h-auto lang-en active" alt="EN">
-                    <img src="https://flagcdn.com/w40/hk.png" class="w-5 h-auto lang-zh" alt="ZH">
-                    <span class="lang-zh">切換語言 (Switch to EN)</span>
-                    <span class="lang-en active">Switch Language (切換繁體)</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <section id="home" class="pt-32 pb-20 px-6 md:px-8 max-w-[1920px] mx-auto border-b border-gray-200">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            <div class="lg:col-span-7 animate-fade-in">
-                <div class="inline-flex items-center gap-2 border border-gray-200 rounded-full px-4 py-2 bg-gray-50 mb-8">
-                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    <span class="text-[11px] uppercase tracking-widest font-mono font-medium text-gray-500">
-                        <span class="lang-zh">算力通證邀請制釋放進行中</span><span class="lang-en active">Token Invitation Release Live</span>
-                    </span>
+            <div class="bg-gray-50 rounded-2xl p-6 mb-6">
+                <div class="flex justify-between mb-3">
+                    <span data-i18n="payment.package2">Package</span>
+                    <span class="font-bold">$600.00</span>
                 </div>
+                <div class="flex justify-between mb-3">
+                    <span data-i18n="payment.networkFee">Network Fee</span>
+                    <span class="font-bold">$3.00</span>
+                </div>
+                <div class="border-t-2 border-gray-300 my-3"></div>
+                <div class="flex justify-between text-xl font-black">
+                    <span data-i18n="payment.total">Total</span>
+                    <span>$603.00</span>
+                </div>
+            </div>
 
-                <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.1] mb-8 text-black">
-                    <span class="lang-zh">AI電影<br>的未來 從這裡開始</span>
-                    <span class="lang-en active">Future of AI Film<br>Starts Here</span>
-                </h1>
+            <!-- CRYPTO PAYMENT -->
+            <div class="mb-6">
+                <h3 class="text-xl font-black mb-4" data-i18n="payment.cryptoTitle">Crypto Payment</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="selectCrypto('USDT-SOL')" class="p-4 border-2 border-gray-200 rounded-xl hover:border-green-500 transition-all">
+                        <div class="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                        </div>
+                        <div class="font-bold">USDT</div>
+                        <div class="text-xs text-gray-500">Solana</div>
+                    </button>
+                    <button onclick="selectCrypto('USDC-SOL')" class="p-4 border-2 border-gray-200 rounded-xl hover:border-blue-500 transition-all">
+                        <div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-circle text-blue-600 text-xl"></i>
+                        </div>
+                        <div class="font-bold">USDC</div>
+                        <div class="text-xs text-gray-500">Solana</div>
+                    </button>
+                    <button onclick="selectCrypto('USDT-BSC')" class="p-4 border-2 border-gray-200 rounded-xl hover:border-yellow-500 transition-all">
+                        <div class="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-dollar-sign text-yellow-600 text-xl"></i>
+                        </div>
+                        <div class="font-bold">USDT</div>
+                        <div class="text-xs text-gray-500">BSC (BEP20)</div>
+                    </button>
+                    <button onclick="selectCrypto('USDC-BSC')" class="p-4 border-2 border-gray-200 rounded-xl hover:border-yellow-500 transition-all">
+                        <div class="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-circle text-yellow-600 text-xl"></i>
+                        </div>
+                        <div class="font-bold">USDC</div>
+                        <div class="text-xs text-gray-500">BSC (BEP20)</div>
+                    </button>
+                </div>
+            </div>
 
-                <p class="text-lg text-gray-500 max-w-2xl leading-relaxed font-light mb-10">
-                    <span class="lang-zh">加入世界首個綜合性AI原生電影生態系統。AIF通證透過香港AI國際電影節平台，為超過3700億美元的AI內容市場提供核心算力支持。</span>
-                    <span class="lang-en active">Join the world's first comprehensive AI-native film ecosystem. AIF tokens power the $370+ billion AI content market through the Hong Kong AI International Film Festival platform.</span>
-                </p>
-
-                <div class="border border-black p-6 rounded-xl mb-10 relative overflow-hidden group hover:bg-gray-50 transition-colors">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 text-4xl"><i class="fas fa-star"></i></div>
-                    <h3 class="text-lg font-bold mb-3 flex items-center gap-2">
-                        <i class="fas fa-star text-xs"></i> 
-                        <span class="lang-zh">第2輪邀請制進行中</span><span class="lang-en active">Round 2 Invitation In Progress</span>
-                    </h3>
-                    <div class="font-mono text-sm space-y-2 text-gray-600 border-t border-gray-200 pt-3">
-                        <p class="flex justify-between">
-                            <span><span class="lang-zh">當前輪次</span><span class="lang-en active">Current Round</span>: <strong>2</strong></span> 
-                            <span><span class="lang-zh">兌換基准</span><span class="lang-en active">Price</span>: <strong>$0.055/AIF</strong></span>
-                        </p>
-                        <p class="flex justify-between">
-                            <span><span class="lang-zh">目標</span><span class="lang-en active">Target</span>: <strong>2000 Wallets</strong></span>
-                        </p>
-                        <p class="text-xs mt-2 text-gray-400">
-                            <i class="fas fa-key mr-1"></i>
-                            <span class="lang-zh">每個錢包地址限額10,000 AIF通證，作為未來公開獲取資格憑證</span>
-                            <span class="lang-en active">Each wallet address limited to 10,000 AIF tokens as qualification for future public sale</span>
-                        </p>
-                    </div>
-                    <div class="mt-6 flex flex-wrap gap-4">
-                        <button onclick="openWhitepaperModal()" class="text-xs font-bold underline uppercase tracking-widest hover:text-gray-500">
-                            <span class="lang-zh">下載白皮書</span><span class="lang-en active">Download Whitepaper</span>
+            <div id="crypto-details" class="hidden mb-6">
+                <div class="mb-4">
+                    <label class="text-sm font-bold mb-2 block" data-i18n="payment.receivingAddress">Receiving Address</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="crypto-address" readonly class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl font-mono text-sm bg-gray-50">
+                        <button onclick="copyCryptoAddress()" class="px-6 bg-gray-200 hover:bg-gray-300 rounded-xl font-bold">
+                            <i class="fas fa-copy"></i>
                         </button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-gray-100 pt-8">
-                    <div>
-                        <div class="text-3xl font-bold mb-1">6</div>
-                        <div class="text-[10px] uppercase text-gray-400 font-mono"><span class="lang-zh">平台</span><span class="lang-en active">Platforms</span></div>
+                <div class="text-center mb-6">
+                    <div class="w-48 h-48 bg-gray-200 rounded-xl mx-auto flex items-center justify-center mb-2">
+                        <i class="fas fa-qrcode text-6xl text-gray-400"></i>
                     </div>
-                    <div>
-                        <div class="text-3xl font-bold mb-1">10</div>
-                        <div class="text-[10px] uppercase text-gray-400 font-mono"><span class="lang-zh">輪次釋放</span><span class="lang-en active">Rounds</span></div>
-                    </div>
-                    <div>
-                        <div class="text-3xl font-bold mb-1">100<span class="text-lg">K</span></div>
-                        <div class="text-[10px] uppercase text-gray-400 font-mono"><span class="lang-zh">美元獎金</span><span class="lang-en active">USD Prize</span></div>
-                    </div>
-                    <div>
-                        <div class="text-3xl font-bold mb-1">370<span class="text-lg">B</span></div>
-                        <div class="text-[10px] uppercase text-gray-400 font-mono"><span class="lang-zh">億美元市場</span><span class="lang-en active">B USD Market</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="lg:col-span-5 flex flex-col gap-6 justify-end animate-slide-up">
-                <div class="bg-gray-50 border border-gray-200 p-8 rounded-2xl">
-                    <h3 class="text-sm font-bold uppercase tracking-widest mb-6 text-gray-500 flex justify-between items-center">
-                        <span class="lang-zh">當前輪次</span><span class="lang-en active">Current Round</span>
-                        <span class="bg-black text-white text-[10px] px-2 py-1 rounded font-mono">LIVE</span>
-                    </h3>
-                    <div class="flex items-baseline gap-2 mb-2">
-                        <span class="text-6xl font-bold tracking-tighter">$0.055</span>
-                        <span class="text-sm text-gray-500 font-mono">/ AIF</span>
-                    </div>
-                    <div class="text-xs text-gray-400 mb-6 font-mono">
-                        <span class="lang-zh">每個AIF通證</span><span class="lang-en active">per AIF token</span>
-                    </div>
-                    
-                    <div class="w-full bg-gray-200 h-2 rounded-full mb-4 overflow-hidden">
-                        <div class="bg-black h-full" style="width: 79%"></div>
-                    </div>
-                    <div class="flex justify-between text-xs font-mono text-gray-500 mb-4">
-                        <span>1617 <span class="lang-zh">已參與</span><span class="lang-en active">Joined</span></span>
-                        <span>2000 <span class="lang-zh">目標</span><span class="lang-en active">Target</span></span>
-                    </div>
+                    <div class="text-sm text-gray-500" data-i18n="payment.scanQR">Scan QR to pay</div>
                 </div>
 
-                <div class="bg-white border border-gray-200 p-8 rounded-2xl">
-                    <h3 class="text-sm font-bold uppercase tracking-widest mb-6 text-gray-500"><span class="lang-zh">通證信息</span><span class="lang-en active">Token Info</span></h3>
-                    <div class="space-y-4 text-sm">
-                        <div class="flex justify-between border-b border-gray-100 pb-2">
-                            <span class="text-gray-500"><span class="lang-zh">通證符號</span><span class="lang-en active">Symbol</span></span>
-                            <span class="font-bold font-mono">AIF</span>
-                        </div>
-                        <div class="flex justify-between border-b border-gray-100 pb-2">
-                            <span class="text-gray-500"><span class="lang-zh">標準</span><span class="lang-en active">Standard</span></span>
-                            <span class="font-bold font-mono">Solana (SPL)</span>
-                        </div>
-                        <div class="flex justify-between border-b border-gray-100 pb-2">
-                            <span class="text-gray-500"><span class="lang-zh">總供應量</span><span class="lang-en active">Total Supply</span></span>
-                            <span class="font-bold font-mono">10,000,000,000</span>
-                        </div>
-                        <div class="flex justify-between pt-2">
-                            <span class="text-gray-500"><span class="lang-zh">限額</span><span class="lang-en active">Limit</span></span>
-                            <span class="font-bold font-mono">10,000 AIF / Wallet</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="about-aif" class="py-24 px-6 md:px-8 max-w-[1920px] mx-auto border-b border-gray-200">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            <div>
-                <h2 class="text-4xl font-bold mb-8 reveal-text"><span class="lang-zh">關於 AIF 算力通證</span><span class="lang-en active">About AIF Token</span></h2>
-                <p class="text-lg text-gray-500 leading-relaxed mb-6 reveal-text">
-                    <span class="lang-zh">AIF（AI Film Token）是驅動香港AI國際電影節生態系統的原生通證。作為SPL標準通證，AIF不僅是生態系統內的算力結算工具，更是參與治理、獲得激勵、版權注資的核心資產。</span>
-                    <span class="lang-en active">AIF (AI Film Token) is the native token driving the Hong Kong AI International Film Festival ecosystem. As an SPL standard token, AIF is not only a payment tool within the ecosystem, but also a core asset for participating in governance, earning rewards, and investing in projects.</span>
-                </p>
-                <p class="text-lg text-gray-500 leading-relaxed mb-8 reveal-text font-medium text-black">
-                    <span class="lang-zh">透過持有AIF通證，您將成為全球首個AI原生電影生態系統的共建者和受益者。</span>
-                    <span class="lang-en active">By holding AIF tokens, you will become a co-builder and beneficiary of the world's first AI-native film ecosystem.</span>
-                </p>
-                <div class="grid grid-cols-2 gap-4 reveal-text">
-                    <div class="border border-gray-200 p-4 rounded-lg">
-                        <div class="text-2xl font-bold mb-1">10B</div>
-                        <div class="text-xs text-gray-400 uppercase"><span class="lang-zh">通證總供應量</span><span class="lang-en active">Total Supply</span></div>
-                    </div>
-                    <div class="border border-gray-200 p-4 rounded-lg">
-                        <div class="text-2xl font-bold mb-1">$0.05</div>
-                        <div class="text-xs text-gray-400 uppercase"><span class="lang-zh">邀請制起始基准</span><span class="lang-en active">Start Price</span></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 reveal-text">
-                <div class="bg-gray-50 p-6 rounded-xl hover:bg-black hover:text-white transition-colors group border border-gray-100">
-                    <i class="fas fa-key mb-4 text-xl group-hover:text-white text-gray-400"></i>
-                    <h4 class="font-bold mb-2"><span class="lang-zh">平台訪問權限</span><span class="lang-en active">Platform Access</span></h4>
-                    <p class="text-xs opacity-60"><span class="lang-zh">電影節提交、學院課程、404.world高級功能。</span><span class="lang-en active">Film festival submissions, academy courses, 404.world premium features.</span></p>
-                </div>
-                <div class="bg-gray-50 p-6 rounded-xl hover:bg-black hover:text-white transition-colors group border border-gray-100">
-                    <i class="fas fa-vote-yea mb-4 text-xl group-hover:text-white text-gray-400"></i>
-                    <h4 class="font-bold mb-2"><span class="lang-zh">生態治理</span><span class="lang-en active">Governance</span></h4>
-                    <p class="text-xs opacity-60"><span class="lang-zh">參與平台決策、資源分配投票。</span><span class="lang-en active">Participate in platform decisions and resource allocation voting.</span></p>
-                </div>
-                <div class="bg-gray-50 p-6 rounded-xl hover:bg-black hover:text-white transition-colors group border border-gray-100">
-                    <i class="fas fa-coins mb-4 text-xl group-hover:text-white text-gray-400"></i>
-                    <h4 class="font-bold mb-2"><span class="lang-zh">版權注資</span><span class="lang-en active">Investment</span></h4>
-                    <p class="text-xs opacity-60"><span class="lang-zh">參與FilmToken數字版權注資、價值網絡流通。</span><span class="lang-en active">Participate in FilmToken project investments and secondary market trading.</span></p>
-                </div>
-                <div class="bg-gray-50 p-6 rounded-xl hover:bg-black hover:text-white transition-colors group border border-gray-100">
-                    <i class="fas fa-gift mb-4 text-xl group-hover:text-white text-gray-400"></i>
-                    <h4 class="font-bold mb-2"><span class="lang-zh">節點貢獻獎勵</span><span class="lang-en active">Rewards</span></h4>
-                    <p class="text-xs opacity-60"><span class="lang-zh">生態共建獎勵，版權收益分享機制。</span><span class="lang-en active">8-23% annual yield, revenue sharing mechanism.</span></p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="phantom-wallet" class="py-24 px-6 md:px-8 max-w-[1920px] mx-auto bg-gray-50 border-b border-gray-200">
-        <div class="max-w-4xl mx-auto text-center mb-16 reveal-text">
-            <h2 class="text-3xl font-bold mb-4"><span class="lang-zh">Phantom 錢包</span><span class="lang-en active">Phantom Wallet</span></h2>
-            <p class="text-gray-500 mb-4"><span class="lang-zh">Phantom是Solana生態系統中最受歡迎的錢包，讓您安全地存儲和管理您的AIF通證。</span><span class="lang-en active">Phantom is the most popular wallet in the Solana ecosystem, allowing you to securely store and manage your AIF tokens.</span></p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12 reveal-text">
-            <div class="text-center p-6 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all">
-                <div class="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-6 font-bold font-mono">1</div>
-                <h4 class="font-bold mb-2"><span class="lang-zh">下載</span><span class="lang-en active">Download</span></h4>
-                <p class="text-xs text-gray-500 leading-relaxed"><span class="lang-zh">從官方網站或應用商店下載並安裝Phantom錢包。</span><span class="lang-en active">Download and install Phantom Wallet from the official website.</span></p>
-            </div>
-            <div class="text-center p-6 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all">
-                <div class="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-6 font-bold font-mono">2</div>
-                <h4 class="font-bold mb-2"><span class="lang-zh">創建/導入</span><span class="lang-en active">Create/Import</span></h4>
-                <p class="text-xs text-gray-500 leading-relaxed"><span class="lang-zh">創建新錢包或使用助記詞導入現有錢包。</span><span class="lang-en active">Create a new wallet or import an existing one.</span></p>
-            </div>
-            <div class="text-center p-6 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all">
-                <div class="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-6 font-bold font-mono">3</div>
-                <h4 class="font-bold mb-2"><span class="lang-zh">申請參與</span><span class="lang-en active">Apply</span></h4>
-                <p class="text-xs text-gray-500 leading-relaxed"><span class="lang-zh">提交申請並提供您的Solana錢包地址。</span><span class="lang-en active">Submit an application and provide your Solana wallet address.</span></p>
-            </div>
-            <div class="text-center p-6 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all">
-                <div class="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-6 font-bold font-mono">4</div>
-                <h4 class="font-bold mb-2"><span class="lang-zh">接收 AIF</span><span class="lang-en active">Receive AIF</span></h4>
-                <p class="text-xs text-gray-500 leading-relaxed"><span class="lang-zh">申請通過後，AIF通證將發送到您的錢包。</span><span class="lang-en active">After approval, AIF tokens will be sent to your wallet.</span></p>
-            </div>
-        </div>
-
-        <div class="text-center reveal-text flex flex-wrap justify-center gap-4">
-            <a href="https://phantom.app/download" target="_blank" class="bg-black text-white px-8 py-4 rounded-full font-bold academy-btn inline-flex items-center gap-2">
-                <i class="fas fa-download"></i> <span class="lang-zh">下載 Phantom 錢包</span><span class="lang-en active">Download Phantom Wallet</span>
-            </a>
-            <a href="#genesis-invitation" class="border border-black text-black px-8 py-4 rounded-full font-bold hover:bg-gray-100 transition-all">
-                <span class="lang-zh">開始申請流程</span><span class="lang-en active">Start Application Process</span>
-            </a>
-        </div>
-    </section>
-
-    <section id="ecosystem" class="py-24 px-6 md:px-8 max-w-[1920px] mx-auto">
-        <div class="mb-12 text-center reveal-text">
-            <h2 class="text-3xl font-bold mb-4"><span class="lang-zh">HKAIIFF 生態系統</span><span class="lang-en active">HKAIIFF Ecosystem</span></h2>
-            <p class="text-gray-500 max-w-2xl mx-auto"><span class="lang-zh">六個集成平台創建AI原生娛樂的完整價值鏈，驅動網絡效應和可持續價值創造。</span><span class="lang-en active">Six integrated platforms create a complete value chain for AI-native entertainment, driving network effects and sustainable value creation.</span></p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 reveal-text">
-            <div class="border border-gray-200 p-8 rounded-xl hover:shadow-lg transition-all hover:border-black group">
-                <div class="text-2xl mb-4 text-gray-400 group-hover:text-black transition-colors"><i class="fas fa-trophy"></i></div>
-                <h3 class="text-xl font-bold mb-2"><span class="lang-zh">展映競賽平台</span><span class="lang-en active">Festival Competition</span></h3>
-                <p class="text-sm text-gray-500 mb-4 min-h-[3rem] leading-relaxed">
-                    <span class="lang-zh">AI原生內容的全球展示舞台，設立100萬美元+獎金池，建立質量標準並認可行業創新。</span>
-                    <span class="lang-en active">Global showcase stage for AI-native content, with $1M+ prize pool, establishing quality standards.</span>
-                </p>
-                <ul class="text-xs space-y-2 text-gray-400 font-mono">
-                    <li>• <span class="lang-zh">獨角獸金獎：100萬美元</span><span class="lang-en active">Unicorn Gold Award: $1M</span></li>
-                    <li>• <span class="lang-zh">全球12個主要城市</span><span class="lang-en active">12 major cities globally</span></li>
-                </ul>
-            </div>
-            
-            <div class="border border-gray-200 p-8 rounded-xl hover:shadow-lg transition-all hover:border-black group">
-                <div class="text-2xl mb-4 text-gray-400 group-hover:text-black transition-colors"><i class="fas fa-graduation-cap"></i></div>
-                <h3 class="text-xl font-bold mb-2"><span class="lang-zh">AI電影學院</span><span class="lang-en active">AI Film Academy</span></h3>
-                <p class="text-sm text-gray-500 mb-4 min-h-[3rem] leading-relaxed">
-                    <span class="lang-zh">AI電影製作的專業教育和認證，透過全面的課程體系解決關鍵技能缺口。</span>
-                    <span class="lang-en active">Professional education and certification for AI filmmaking, addressing critical skill gaps.</span>
-                </p>
-                <ul class="text-xs space-y-2 text-gray-400 font-mono">
-                    <li>• <span class="lang-zh">2030年100+中心</span><span class="lang-en active">100+ centers by 2030</span></li>
-                    <li>• <span class="lang-zh">預計12萬+學生</span><span class="lang-en active">Expected 120K+ students</span></li>
-                </ul>
-            </div>
-
-            <div class="border border-gray-200 p-8 rounded-xl hover:shadow-lg transition-all hover:border-black group">
-                <div class="text-2xl mb-4 text-gray-400 group-hover:text-black transition-colors"><i class="fas fa-coins"></i></div>
-                <h3 class="text-xl font-bold mb-2"><span class="lang-zh">AI電影市場</span><span class="lang-en active">AI Film Market</span></h3>
-                <p class="text-sm text-gray-500 mb-4 min-h-[3rem] leading-relaxed">
-                    <span class="lang-zh">透過數字化版權眾籌和智能合約，為電影項目融資創建去中心化透明市場。</span>
-                    <span class="lang-en active">Creating a decentralized transparent market for film project financing through tokenized crowdfunding.</span>
-                </p>
-                <ul class="text-xs space-y-2 text-gray-400 font-mono">
-                    <li>• <span class="lang-zh">FilmToken版權注資</span><span class="lang-en active">FilmToken investments</span></li>
-                    <li>• <span class="lang-zh">透明收益分享</span><span class="lang-en active">Transparent revenue sharing</span></li>
-                </ul>
-            </div>
-
-            <div class="border border-gray-200 p-8 rounded-xl hover:shadow-lg transition-all hover:border-black group">
-                <div class="text-2xl mb-4 text-gray-400 group-hover:text-black transition-colors"><i class="fas fa-search"></i></div>
-                <h3 class="text-xl font-bold mb-2"><span class="lang-zh">徵片中心</span><span class="lang-en active">Casting Center</span></h3>
-                <p class="text-sm text-gray-500 mb-4 min-h-[3rem] leading-relaxed">
-                    <span class="lang-zh">連接創作者與製片人的專業平台，促進AI電影項目的發現和合作。</span>
-                    <span class="lang-en active">Professional platform connecting creators with producers, facilitating discovery and collaboration.</span>
-                </p>
-                <ul class="text-xs space-y-2 text-gray-400 font-mono">
-                    <li>• <span class="lang-zh">項目配對算法</span><span class="lang-en active">Project matching algorithm</span></li>
-                    <li>• <span class="lang-zh">專業評估工具</span><span class="lang-en active">Professional assessment tools</span></li>
-                </ul>
-            </div>
-
-            <div class="border border-gray-200 p-8 rounded-xl hover:shadow-lg transition-all hover:border-black group">
-                <div class="text-2xl mb-4 text-gray-400 group-hover:text-black transition-colors"><i class="fas fa-globe"></i></div>
-                <h3 class="text-xl font-bold mb-2"><span class="lang-zh">404.world</span><span class="lang-en active">404.world</span></h3>
-                <p class="text-sm text-gray-500 mb-4 min-h-[3rem] leading-relaxed">
-                    <span class="lang-zh">AI原生內容的全球分發和消費平台，為創作者提供直接變現渠道。</span>
-                    <span class="lang-en active">Global distribution and consumption platform for AI-native content, providing direct monetization.</span>
-                </p>
-                <ul class="text-xs space-y-2 text-gray-400 font-mono">
-                    <li>• <span class="lang-zh">全球內容分發</span><span class="lang-en active">Global content distribution</span></li>
-                    <li>• <span class="lang-zh">創作者變現工具</span><span class="lang-en active">Creator monetization tools</span></li>
-                </ul>
-            </div>
-
-            <div class="border border-gray-200 p-8 rounded-xl hover:shadow-lg transition-all hover:border-black group">
-                <div class="text-2xl mb-4 text-gray-400 group-hover:text-black transition-colors"><i class="fas fa-exchange-alt"></i></div>
-                <h3 class="text-xl font-bold mb-2"><span class="lang-zh">AIF 價值網絡</span><span class="lang-en active">AIF Exchange</span></h3>
-                <p class="text-sm text-gray-500 mb-4 min-h-[3rem] leading-relaxed">
-                    <span class="lang-zh">專業的通證交換網絡，支持AIF和FilmToken的價值流通和價格發現。</span>
-                    <span class="lang-en active">Professional token trading platform supporting liquidity trading and price discovery.</span>
-                </p>
-                <ul class="text-xs space-y-2 text-gray-400 font-mono">
-                    <li>• <span class="lang-zh">生態激勵</span><span class="lang-en active">Liquidity mining</span></li>
-                    <li>• <span class="lang-zh">跨鏈橋接支持</span><span class="lang-en active">Cross-chain bridge support</span></li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <section id="tokenomics" class="py-24 px-6 md:px-8 max-w-[1920px] mx-auto bg-gray-50 border-y border-gray-200">
-        <h2 class="text-3xl font-bold mb-12 reveal-text"><span class="lang-zh">通證經濟學</span><span class="lang-en active">Tokenomics</span></h2>
-        
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 reveal-text">
-            <div class="space-y-6">
-                <h3 class="font-bold text-xl mb-6"><span class="lang-zh">通證分配</span><span class="lang-en active">Token Distribution</span></h3>
-                
-                <div class="flex justify-between items-center border-b border-gray-200 pb-4">
-                    <div>
-                        <span class="font-bold block"><span class="lang-zh">邀請制釋放</span><span class="lang-en active">Invitation Release</span></span>
-                        <span class="text-xs text-gray-500"><span class="lang-zh">15億 AIF - 10輪邀請制釋放</span><span class="lang-en active">1.5B AIF - 10 rounds</span></span>
-                    </div>
-                    <span class="font-mono font-bold text-lg">15%</span>
-                </div>
-                
-                <div class="flex justify-between items-center border-b border-gray-200 pb-4">
-                    <div>
-                        <span class="font-bold block"><span class="lang-zh">公開獲取通道</span><span class="lang-en active">Public Sale</span></span>
-                        <span class="text-xs text-gray-500"><span class="lang-zh">25億 AIF - 公開市場獲取</span><span class="lang-en active">2.5B AIF - Public market sale</span></span>
-                    </div>
-                    <span class="font-mono font-bold text-lg">25%</span>
-                </div>
-
-                <div class="flex justify-between items-center border-b border-gray-200 pb-4">
-                    <div>
-                        <span class="font-bold block"><span class="lang-zh">生態系統發展</span><span class="lang-en active">Ecosystem Development</span></span>
-                        <span class="text-xs text-gray-500"><span class="lang-zh">30億 AIF - 平台開發和運營</span><span class="lang-en active">3B AIF - Development</span></span>
-                    </div>
-                    <span class="font-mono font-bold text-lg">30%</span>
-                </div>
-
-                <div class="flex justify-between items-center border-b border-gray-200 pb-4">
-                    <div>
-                        <span class="font-bold block"><span class="lang-zh">團隊和顧問</span><span class="lang-en active">Team & Advisors</span></span>
-                        <span class="text-xs text-gray-500"><span class="lang-zh">15億 AIF - 4年線性釋放</span><span class="lang-en active">1.5B AIF - 4-year vesting</span></span>
-                    </div>
-                    <span class="font-mono font-bold text-lg">15%</span>
-                </div>
-
-                <div class="flex justify-between items-center border-b border-gray-200 pb-4">
-                    <div>
-                        <span class="font-bold block"><span class="lang-zh">社區獎勵</span><span class="lang-en active">Community Rewards</span></span>
-                        <span class="text-xs text-gray-500"><span class="lang-zh">15億 AIF - 節點獎勵和激勵</span><span class="lang-en active">1.5B AIF - Rewards</span></span>
-                    </div>
-                    <span class="font-mono font-bold text-lg">15%</span>
-                </div>
-            </div>
-            
-            <div class="bg-white p-8 rounded-2xl border border-gray-200">
-                <h3 class="font-bold text-xl mb-4"><span class="lang-zh">網絡效應價值</span><span class="lang-en active">Network Effect Value</span></h3>
-                <p class="text-sm text-gray-500 mb-8 leading-relaxed">
-                    <span class="lang-zh">HKAIIFF生態系統的價值隨著參與者數量的增加而指數級增長，遵循梅特卡夫定律：網絡價值 = n × (n-1)。</span>
-                    <span class="lang-en active">The value of the HKAIIFF ecosystem grows exponentially with the number of participants, following Metcalfe's Law: Network Value = n × (n-1).</span>
-                </p>
-                <div class="space-y-6 text-sm">
-                    <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-100">
-                        <span class="font-bold">10K Users</span>
-                        <div class="text-right">
-                            <div class="font-mono font-bold">$10M Value</div>
-                            <div class="text-[10px] text-gray-400 uppercase"><span class="lang-zh">基礎效用價值</span><span class="lang-en active">Basic Utility</span></div>
-                        </div>
-                    </div>
-                    <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-100">
-                        <span class="font-bold">100K Users</span>
-                        <div class="text-right">
-                            <div class="font-mono font-bold">$1B Value</div>
-                            <div class="text-[10px] text-gray-400 uppercase"><span class="lang-zh">100倍效用</span><span class="lang-en active">100x Utility</span></div>
-                        </div>
-                    </div>
-                    <div class="flex justify-between items-center p-4 border border-black rounded-lg">
-                        <span class="font-bold">1M Users</span>
-                        <div class="text-right">
-                            <div class="font-mono font-bold">$100B Value</div>
-                            <div class="text-[10px] text-gray-400 uppercase"><span class="lang-zh">行業標準</span><span class="lang-en active">Industry Standard</span></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="invitation" class="py-24 px-6 md:px-8 max-w-[1920px] mx-auto">
-        <div class="text-center mb-16 reveal-text">
-            <h2 class="text-3xl font-bold mb-4"><span class="lang-zh">通證邀請制釋放</span><span class="lang-en active">Invitation Release</span></h2>
-            <p class="text-gray-500 max-w-2xl mx-auto">
-                <span class="lang-zh">10輪邀請制通證釋放，每輪以1000個錢包地址為標準。每个钱包限额10,000 AIF。</span>
-                <span class="lang-en active">10 rounds of invitation token release. Limited to 10,000 AIF per wallet.</span>
-            </p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20 reveal-text">
-            <div class="border border-gray-200 bg-gray-50 p-8 rounded-xl relative overflow-hidden opacity-70">
-                <span class="absolute top-4 right-4 text-xs font-bold text-gray-400 uppercase border border-gray-300 px-2 py-1 rounded">
-                    <span class="lang-zh">已完成</span><span class="lang-en active">Completed</span>
-                </span>
-                <h3 class="text-xl font-bold mb-2"><span class="lang-zh">第1輪</span><span class="lang-en active">Round 1</span></h3>
-                <div class="text-4xl font-bold mb-2 font-mono text-gray-500">$0.05</div>
-                <p class="text-xs text-gray-400 mb-6 font-mono"><span class="lang-zh">目標 1000 錢包</span><span class="lang-en active">Target 1000 Wallets</span></p>
-                <div class="w-full bg-gray-200 h-1.5 rounded-full mb-2">
-                    <div class="bg-gray-500 h-full w-full rounded-full"></div>
-                </div>
-                <div class="text-[10px] text-gray-400 uppercase font-bold text-center">100%</div>
-            </div>
-
-            <div class="border border-black bg-white text-black p-8 rounded-xl relative overflow-hidden shadow-xl transform scale-105 z-10">
-                <span class="absolute top-4 right-4 text-xs font-bold bg-black text-white px-3 py-1 rounded uppercase animate-pulse">
-                    <span class="lang-zh">進行中</span><span class="lang-en active">In Progress</span>
-                </span>
-                <h3 class="text-xl font-bold mb-2"><span class="lang-zh">第2輪 (當前)</span><span class="lang-en active">Round 2 (Current)</span></h3>
-                <div class="text-5xl font-bold mb-2 font-mono">$0.055</div>
-                <p class="text-xs text-gray-500 mb-6 font-mono"><span class="lang-zh">目標 2000 錢包</span><span class="lang-en active">Target 2000 Wallets</span></p>
-                <div class="w-full bg-gray-100 h-2 rounded-full mb-2">
-                    <div class="bg-black h-full rounded-full" style="width: 79%"></div>
-                </div>
-                <div class="flex justify-between text-[10px] text-gray-500 uppercase font-bold">
-                    <span>1617 Joined</span>
-                    <span>79%</span>
-                </div>
-                <p class="text-xs mt-6 pt-6 border-t border-gray-100 text-gray-500 leading-relaxed">
-                    <span class="lang-zh">兌換基准即將調整至 $0.06。</span>
-                    <span class="lang-en active">Price increasing to $0.06 soon.</span>
-                </p>
-            </div>
-
-            <div class="border border-gray-200 bg-white p-8 rounded-xl opacity-60">
-                <span class="absolute top-4 right-4 text-xs font-bold text-gray-400 uppercase">
-                    <span class="lang-zh">未來</span><span class="lang-en active">Future</span>
-                </span>
-                <h3 class="text-xl font-bold mb-2"><span class="lang-zh">第3-10輪</span><span class="lang-en active">Round 3-10</span></h3>
-                <div class="text-4xl font-bold mb-2 font-mono text-gray-400">$0.06 - 0.10</div>
-                <p class="text-xs text-gray-400 mb-6 font-mono"><span class="lang-zh">目標 10000 錢包</span><span class="lang-en active">Target 10000 Wallets</span></p>
-                <ul class="text-xs space-y-2 text-gray-400">
-                    <li>• <span class="lang-zh">基准遞增</span><span class="lang-en active">Progressive Pricing</span></li>
-                    <li>• <span class="lang-zh">標準權益</span><span class="lang-en active">Standard Benefits</span></li>
-                </ul>
-            </div>
-        </div>
-
-        <div id="genesis-invitation" class="max-w-5xl mx-auto border border-gray-200 rounded-2xl overflow-hidden reveal-text">
-            <div class="bg-gray-50 p-8 border-b border-gray-200 text-center">
-                <h3 class="text-2xl font-bold mb-2"><span class="lang-zh">創世邀請計劃 & 兌換</span><span class="lang-en active">Genesis Invitation & Payment</span></h3>
-                <p class="text-sm text-gray-500 max-w-xl mx-auto">
-                    <span class="lang-zh">限量10,000個錢包地址的獨家創世邀請計劃。選擇您的支付方式完成獲取。</span>
-                    <span class="lang-en active">Exclusive Genesis Invitation Program limited to 10,000 wallet addresses. Select payment method to purchase.</span>
-                </p>
-            </div>
-
-            <div class="p-8 md:p-12">
-                <div class="mb-12">
-                    <div class="flex items-center gap-4 mb-6">
-                        <span class="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-bold">1</span>
-                        <h4 class="text-xl font-bold"><span class="lang-zh">支付訂單</span><span class="lang-en active">Make Payment</span></h4>
-                    </div>
-                    
-                    <p class="text-sm text-gray-500 mb-4 ml-12">
-                        <span class="lang-zh">接受 MASTERCARD、VISA 和 APPLE PAY。</span>
-                        <span class="lang-en active">Accept MASTERCARD, VISA and APPLE PAY.</span>
-                    </p>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 ml-0 md:ml-12">
-                        <a href="https://wise.com/pay/r/YgePWEvx0Jo_i8I" target="_blank" class="border border-gray-200 hover:border-black hover:bg-black hover:text-white p-4 rounded-xl text-center transition-all group">
-                            <div class="font-bold mb-1 group-hover:text-white"><i class="fas fa-dollar-sign mr-1"></i> USD</div>
-                            <div class="text-sm font-mono text-gray-500 group-hover:text-gray-300">$569.69</div>
-                        </a>
-                        <a href="https://wise.com/pay/r/h2x5zzOt3vjGJN8" target="_blank" class="border border-gray-200 hover:border-black hover:bg-black hover:text-white p-4 rounded-xl text-center transition-all group">
-                            <div class="font-bold mb-1 group-hover:text-white"><i class="fas fa-dollar-sign mr-1"></i> HKD</div>
-                            <div class="text-sm font-mono text-gray-500 group-hover:text-gray-300">HK$4,427</div>
-                        </a>
-                        <a href="https://wise.com/pay/r/pZn6jJybopfVFr8" target="_blank" class="border border-gray-200 hover:border-black hover:bg-black hover:text-white p-4 rounded-xl text-center transition-all group">
-                            <div class="font-bold mb-1 group-hover:text-white"><i class="fas fa-yen-sign mr-1"></i> JPY</div>
-                            <div class="text-sm font-mono text-gray-500 group-hover:text-gray-300">¥88,234</div>
-                        </a>
-                    </div>
-
-                    <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 ml-0 md:ml-12">
-                        <h5 class="font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
-                            <i class="fas fa-wallet"></i> <span class="lang-zh">加密貨幣支付 (USDT/USDC)</span><span class="lang-en active">Crypto Payment (USDT/USDC)</span>
-                        </h5>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <p class="text-[10px] font-bold text-gray-500 uppercase mb-1">Solana Network Address</p>
-                                <div class="bg-white border border-gray-200 p-3 rounded font-mono text-xs break-all selection:bg-black selection:text-white flex items-center justify-between">
-                                    <span>3QBgQiHC743ER9beX74bp8K7xrURQR2t5myfcG6tSTLv</span>
-                                    <i class="far fa-copy cursor-pointer hover:text-black text-gray-400"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-bold text-gray-500 uppercase mb-1">Binance Smart Chain (BEP20) Address</p>
-                                <div class="bg-white border border-gray-200 p-3 rounded font-mono text-xs break-all selection:bg-black selection:text-white flex items-center justify-between">
-                                    <span>0xc059dc798ec9f31e765d9cccffd2c62b993857c9</span>
-                                    <i class="far fa-copy cursor-pointer hover:text-black text-gray-400"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="text-xs text-red-600 mt-4 border-l-2 border-red-600 pl-3">
-                            <span class="lang-zh">⚠️ 重要提示：請務必核對網絡選擇，避免資產損失。</span>
-                            <span class="lang-en active">⚠️ Important: Please verify the network selection to avoid asset loss.</span>
-                        </p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-gray-100 pt-8">
-                    <div>
-                        <div class="flex items-center gap-4 mb-4">
-                            <span class="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-bold">2</span>
-                            <h4 class="text-xl font-bold"><span class="lang-zh">發送憑證</span><span class="lang-en active">Send Proof</span></h4>
-                        </div>
-                        <p class="text-sm text-gray-600 mb-2 leading-relaxed">
-                            <span class="lang-zh">將支付憑證和接收AIF通證的錢包地址發送至：</span>
-                            <span class="lang-en active">Email payment proof and AIF receiving wallet address to:</span>
-                        </p>
-                        <div class="font-mono font-bold text-lg bg-gray-50 inline-block px-3 py-1 rounded">Genesis@aif.market</div>
-                        <p class="text-xs text-gray-400 mt-2">
-                            <span class="lang-zh">* 錢包地址必須為 Solana 地址</span>
-                            <span class="lang-en active">* Must be a Solana wallet address</span>
-                        </p>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-4 mb-4">
-                            <span class="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-bold">3</span>
-                            <h4 class="text-xl font-bold"><span class="lang-zh">接收通證</span><span class="lang-en active">Receive Tokens</span></h4>
-                        </div>
-                        <p class="text-sm text-gray-600 leading-relaxed mb-3">
-                            <span class="lang-zh">郵件信息驗證後，10-30分鐘左右AIF通證發送至用戶錢包。</span>
-                            <span class="lang-en active">After verification, tokens are sent to wallet within 10-30 minutes.</span>
-                        </p>
-                        <a href="https://solscan.io" target="_blank" class="text-xs underline hover:text-black text-gray-400 flex items-center gap-1">
-                            Track on Solscan <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-20 max-w-4xl mx-auto reveal-text">
-            <h3 class="text-xl font-bold mb-6 text-center"><span class="lang-zh">階梯價值對照表</span><span class="lang-en active">Tiered Pricing Table</span></h3>
-            <div class="border border-gray-200 rounded-xl overflow-hidden">
-                <table class="w-full text-sm text-left">
-                    <thead class="bg-gray-50 font-mono text-xs uppercase text-gray-500 border-b border-gray-200">
-                        <tr>
-                            <th class="p-4"><span class="lang-zh">地址數量</span><span class="lang-en active">Address Count</span></th>
-                            <th class="p-4"><span class="lang-zh">價值 (USD)</span><span class="lang-en active">Price (USD)</span></th>
-                            <th class="p-4"><span class="lang-zh">狀態</span><span class="lang-en active">Status</span></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        <tr class="bg-gray-50">
-                            <td class="p-4 font-bold">1 - 1,000</td>
-                            <td class="p-4 font-mono text-gray-500">$0.05</td>
-                            <td class="p-4 font-bold text-green-600"><span class="lang-zh">進行中 (第1輪已滿)</span><span class="lang-en active">Active (R1 Full)</span></td>
-                        </tr>
-                        <tr class="bg-black text-white">
-                            <td class="p-4 font-bold">1,001 - 2,000</td>
-                            <td class="p-4 font-mono font-bold text-white">$0.055</td>
-                            <td class="p-4 font-bold text-green-400 flex items-center gap-2">
-                                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                                <span class="lang-zh">進行中</span><span class="lang-en active">In Progress</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="p-4">2,001 - 3,000</td>
-                            <td class="p-4 font-mono">$0.06</td>
-                            <td class="p-4 text-gray-400"><span class="lang-zh">未來</span><span class="lang-en active">Future</span></td>
-                        </tr>
-                        <tr>
-                            <td class="p-4">3,001 - 4,000</td>
-                            <td class="p-4 font-mono">$0.065</td>
-                            <td class="p-4 text-gray-400"><span class="lang-zh">未來</span><span class="lang-en active">Future</span></td>
-                        </tr>
-                        <tr>
-                            <td class="p-4">4,001 - 10,000</td>
-                            <td class="p-4 font-mono">$0.07 - 0.10</td>
-                            <td class="p-4 text-gray-400"><span class="lang-zh">未來</span><span class="lang-en active">Future</span></td>
-                        </tr>
-                        <tr class="bg-gray-50">
-                            <td class="p-4 font-bold"><span class="lang-zh">公開獲取</span><span class="lang-en active">Public Sale</span></td>
-                            <td class="p-4 font-mono font-bold">$0.20</td>
-                            <td class="p-4 text-gray-400"><span class="lang-zh">待定</span><span class="lang-en active">TBD</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <p class="text-center text-xs text-gray-400 mt-4">
-                <span class="lang-zh">* 每個錢包地址限額10,000 AIF通證。越早參與兌換基准越優惠。</span>
-                <span class="lang-en active">* Each wallet address limited to 10,000 AIF tokens. Earlier participation means better pricing.</span>
-            </p>
-        </div>
-    </section>
-
-    <section id="roadmap" class="py-24 px-6 md:px-8 max-w-[1920px] mx-auto border-t border-gray-200 bg-gray-50">
-        <h2 class="text-3xl font-bold mb-16 text-center reveal-text"><span class="lang-zh">發展路線圖</span><span class="lang-en active">Development Roadmap</span></h2>
-        
-        <div class="max-w-4xl mx-auto space-y-12 border-l border-gray-300 pl-8 ml-4 md:ml-auto md:mr-auto reveal-text">
-            <div class="relative">
-                <span class="absolute -left-[39px] top-1 w-5 h-5 bg-black rounded-full border-4 border-white"></span>
-                <h3 class="text-xl font-bold mb-2"><span class="lang-zh">2025年第2-4季度</span><span class="lang-en active">2025 Q2-Q4</span></h3>
-                <p class="text-sm text-gray-500 font-bold uppercase tracking-wider mb-4"><span class="lang-zh">基礎啟動 (進行中)</span><span class="lang-en active">Foundation Launch (In Progress)</span></p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                    <div>
-                        <strong class="block text-black mb-1"><span class="lang-zh">平台開發</span><span class="lang-en active">Platform Dev</span></strong>
-                        <ul class="list-disc pl-4 space-y-1">
-                            <li>Invitation rounds 1-3</li>
-                            <li>AI Film Academy Beta</li>
-                            <li>Smart contract deployment</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <strong class="block text-black mb-1"><span class="lang-zh">生態增長</span><span class="lang-en active">Ecosystem</span></strong>
-                        <ul class="list-disc pl-4 space-y-1">
-                            <li>3000+ wallets participating</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <div class="relative opacity-80">
-                <span class="absolute -left-[39px] top-1 w-5 h-5 bg-gray-300 rounded-full border-4 border-white"></span>
-                <h3 class="text-xl font-bold mb-2"><span class="lang-zh">2026年</span><span class="lang-en active">2026</span></h3>
-                <p class="text-sm text-gray-500 font-bold uppercase tracking-wider mb-4"><span class="lang-zh">擴張年</span><span class="lang-en active">Expansion Year</span></p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                    <ul class="list-disc pl-4 space-y-1">
-                        <li>First Hong Kong AI Film Festival (May 1)</li>
-                        <li>Produce 20+ AI films</li>
-                        <li>Mobile App Release</li>
-                    </ul>
-                    <ul class="list-disc pl-4 space-y-1">
-                        <li>5 Partnership Centers</li>
-                        <li>500K+ Platform Users</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="relative opacity-60">
-                <span class="absolute -left-[39px] top-1 w-5 h-5 bg-gray-300 rounded-full border-4 border-white"></span>
-                <h3 class="text-xl font-bold mb-2"><span class="lang-zh">2027-2028年</span><span class="lang-en active">2027-2028</span></h3>
-                <p class="text-sm text-gray-500 font-bold uppercase tracking-wider mb-4"><span class="lang-zh">市場領導地位</span><span class="lang-en active">Market Leadership</span></p>
-                <ul class="list-disc pl-4 space-y-1 text-sm text-gray-600">
-                    <li>Produce 100+ AI films</li>
-                    <li>$100M+ Project Financing</li>
-                    <li>1M+ Monthly Active Users</li>
-                    <li>Traditional Studio Partnerships</li>
-                </ul>
-            </div>
-            
-            <div class="relative opacity-40">
-                <span class="absolute -left-[39px] top-1 w-5 h-5 bg-gray-300 rounded-full border-4 border-white"></span>
-                <h3 class="text-xl font-bold mb-2"><span class="lang-zh">2029-2030年</span><span class="lang-en active">2029-2030</span></h3>
-                <p class="text-sm text-gray-500 font-bold uppercase tracking-wider mb-4"><span class="lang-zh">全球生態系統</span><span class="lang-en active">Global Ecosystem</span></p>
-                <ul class="list-disc pl-4 space-y-1 text-sm text-gray-600">
-                    <li>100+ Partnership Centers</li>
-                    <li>10M+ Platform Users</li>
-                    <li>$1B+ Annual Ecosystem Revenue</li>
-                    <li>AGI Integration</li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-24 px-6 md:px-8 max-w-[1920px] mx-auto border-t border-gray-200">
-        <div class="text-center mb-12 reveal-text">
-            <h2 class="text-3xl font-bold mb-4"><span class="lang-zh">巨大市場機會</span><span class="lang-en active">Market Opportunity</span></h2>
-            <p class="text-gray-500"><span class="lang-zh">AI與娛樂的融合代表著創意產業中最大的技術變革之一。</span><span class="lang-en active">The fusion of AI and entertainment represents one of the biggest technological transformations.</span></p>
-        </div>
-        
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 reveal-text">
-            <div class="border border-gray-200 p-6 rounded-xl text-center hover:border-black transition-colors">
-                <div class="text-2xl font-bold mb-2 font-mono">$2.3T</div>
-                <div class="text-xs text-gray-500 uppercase tracking-wide"><span class="lang-zh">全球娛樂市場</span><span class="lang-en active">Global Ent. Market</span></div>
-            </div>
-            <div class="border border-gray-200 p-6 rounded-xl text-center hover:border-black transition-colors">
-                <div class="text-2xl font-bold mb-2 font-mono">$370B+</div>
-                <div class="text-xs text-gray-500 uppercase tracking-wide"><span class="lang-zh">AI內容市場 (2030)</span><span class="lang-en active">AI Content (2030)</span></div>
-            </div>
-            <div class="border border-gray-200 p-6 rounded-xl text-center hover:border-black transition-colors">
-                <div class="text-2xl font-bold mb-2 font-mono">54%</div>
-                <div class="text-xs text-gray-500 uppercase tracking-wide"><span class="lang-zh">年增長率</span><span class="lang-en active">CAGR</span></div>
-            </div>
-            <div class="border border-gray-200 p-6 rounded-xl text-center hover:border-black transition-colors">
-                <div class="text-2xl font-bold mb-2 font-mono">35%</div>
-                <div class="text-xs text-gray-500 uppercase tracking-wide"><span class="lang-zh">亞太份額</span><span class="lang-en active">Asia-Pacific Share</span></div>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-24 px-6 text-center bg-gray-50 border-t border-gray-200">
-        <div class="max-w-xl mx-auto reveal-text">
-            <h2 class="text-3xl font-bold mb-6"><span class="lang-zh">加入革命</span><span class="lang-en active">Join the Revolution</span></h2>
-            <p class="text-gray-500 mb-8"><span class="lang-zh">訂閱獲取邀請制更新和早期訪問權限。</span><span class="lang-en active">Subscribe for invitation updates and early access.</span></p>
-            <form class="flex flex-col sm:flex-row gap-4" onsubmit="event.preventDefault(); alert('Subscribed!');">
-                <input type="email" placeholder="Email address" class="flex-1 bg-white border border-gray-200 px-6 py-4 rounded-full outline-none focus:border-black transition-colors">
-                <button type="submit" class="bg-black text-white px-8 py-4 rounded-full font-bold academy-btn"><span class="lang-zh">訂閱</span><span class="lang-en active">Subscribe</span></button>
-            </form>
-        </div>
-    </section>
-
-    <footer class="bg-black text-white pt-24 pb-8 px-6 md:px-8">
-        <div class="max-w-[1920px] mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 border-b border-white/20 pb-12">
-                <div class="col-span-1 md:col-span-2">
-                    <div class="flex items-center gap-3 mb-6">
-                        <img src="logo.jpeg" alt="AIF Logo" class="w-10 h-10 rounded-lg grayscale">
-                        <div class="text-2xl font-bold font-mono">AIF Token.</div>
-                    </div>
-                    <p class="text-gray-400 text-sm max-w-xs leading-relaxed">
-                        <span class="lang-zh">全球首個綜合性AI原生電影生態系統的通證。</span>
-                        <span class="lang-en active">Token for the world's first comprehensive AI-native film ecosystem.</span>
-                    </p>
-                    <div class="flex gap-4 mt-6 text-gray-400">
-                        <a href="#" class="hover:text-white transition-colors"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="hover:text-white transition-colors"><i class="fab fa-discord"></i></a>
-                        <a href="#" class="hover:text-white transition-colors"><i class="fab fa-telegram"></i></a>
-                        <a href="#" class="hover:text-white transition-colors"><i class="fab fa-medium"></i></a>
-                    </div>
-                </div>
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider mb-6 text-gray-500"><span class="lang-zh">聯繫方式</span><span class="lang-en active">Contact</span></h4>
-                    <ul class="space-y-3 text-sm text-gray-300 font-mono">
-                        <li>investors@aif.market</li>
-                        <li>partnerships@aif.market</li>
-                        <li>support@aif.market</li>
-                        <li>media@aif.market</li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider mb-6 text-gray-500"><span class="lang-zh">全球辦公室</span><span class="lang-en active">Offices</span></h4>
-                    <ul class="space-y-3 text-sm text-gray-300 font-mono">
-                        <li>Hong Kong (HQ)</li>
-                        <li>Singapore</li>
-                        <li>London</li>
-                        <li>Los Angeles</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="mt-12 flex flex-col md:flex-row justify-between items-center text-[10px] uppercase text-gray-500 font-mono">
-                <p>&copy; 2025 HKAIIFF Association.</p>
-                <p><span class="lang-zh">本網站內容僅供技術交流，不構成投資建議。</span><span class="lang-en active">Not investment advice.</span></p>
-            </div>
-        </div>
-    </footer>
-
-    <div id="whitepaper-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl max-w-md w-full p-8 relative animate-fade-in">
-            <button onclick="closeWhitepaperModal()" class="absolute top-4 right-4 text-xl text-gray-400 hover:text-black transition-colors"><i class="fas fa-times"></i></button>
-            <h3 class="text-2xl font-bold mb-4"><span class="lang-zh">下載白皮書</span><span class="lang-en active">Download Whitepaper</span></h3>
-            <p class="text-gray-500 mb-6 text-sm leading-relaxed">
-                <span class="lang-zh">請輸入您的電子郵件地址以下載AIF通證白皮書。</span>
-                <span class="lang-en active">Please enter your email address to download the AIF Token Whitepaper.</span>
-            </p>
-            <form onsubmit="event.preventDefault(); closeWhitepaperModal(); alert('Sent!');">
-                <input type="email" placeholder="Email address" class="w-full border border-gray-200 p-4 rounded-lg mb-4 outline-none focus:border-black transition-colors" required>
-                <button type="submit" class="w-full bg-black text-white p-4 rounded-lg font-bold academy-btn">
-                    <span class="lang-zh">下載</span><span class="lang-en active">Download</span>
+                <button onclick="confirmPayment()" class="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-black text-lg">
+                    <i class="fas fa-check-circle mr-2"></i><span data-i18n="payment.paid">I've Paid</span>
                 </button>
-            </form>
+            </div>
+
+            <!-- FIAT PAYMENT -->
+            <div>
+                <h3 class="text-xl font-black mb-4" data-i18n="payment.fiatTitle">Fiat Payment (Stripe)</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="https://buy.stripe.com/7sYeVd5sc9RxaqvgBD0x200" target="_blank" class="p-4 border-2 border-gray-200 rounded-xl hover:border-black transition-all text-center">
+                        <div class="font-bold">HKD 4,840</div>
+                        <div class="text-xs text-gray-500" data-i18n="payment.hkd">Hong Kong Dollar</div>
+                    </a>
+                    <a href="https://buy.stripe.com/14AeVd9Is9Rx9mr7130x202" target="_blank" class="p-4 border-2 border-gray-200 rounded-xl hover:border-black transition-all text-center">
+                        <div class="font-bold">USD 622</div>
+                        <div class="text-xs text-gray-500" data-i18n="payment.usd">US Dollar</div>
+                    </a>
+                    <a href="https://buy.stripe.com/8x24gz1bW7Jp6af2KN0x203" target="_blank" class="p-4 border-2 border-gray-200 rounded-xl hover:border-black transition-all text-center">
+                        <div class="font-bold">JPY 96,800</div>
+                        <div class="text-xs text-gray-500" data-i18n="payment.jpy">Japanese Yen</div>
+                    </a>
+                    <a href="https://buy.stripe.com/9B600jcUE0gX2Y3adf0x204" target="_blank" class="p-4 border-2 border-gray-200 rounded-xl hover:border-black transition-all text-center">
+                        <div class="font-bold">SGD 804</div>
+                        <div class="text-xs text-gray-500" data-i18n="payment.sgd">Singapore Dollar</div>
+                    </a>
+                    <a href="https://buy.stripe.com/3cI7sL6wg5Bh2Y3bhj0x205" target="_blank" class="p-4 border-2 border-gray-200 rounded-xl hover:border-black transition-all text-center">
+                        <div class="font-bold">GBP 467</div>
+                        <div class="text-xs text-gray-500" data-i18n="payment.gbp">British Pound</div>
+                    </a>
+                    <a href="https://buy.stripe.com/00w5kDcUE5BheGL5WZ0x206" target="_blank" class="p-4 border-2 border-gray-200 rounded-xl hover:border-black transition-all text-center">
+                        <div class="font-bold">EUR 532</div>
+                        <div class="text-xs text-gray-500" data-i18n="payment.eur">Euro</div>
+                    </a>
+                    <a href="https://buy.stripe.com/dRmdR9f2MfbR0PVdpr0x207" target="_blank" class="p-4 border-2 border-gray-200 rounded-xl hover:border-black transition-all text-center">
+                        <div class="font-bold">AED 2,285</div>
+                        <div class="text-xs text-gray-500" data-i18n="payment.aed">UAE Dirham</div>
+                    </a>
+                    <a href="https://buy.stripe.com/aFa8wPg6Q2p5eGL8570x208" target="_blank" class="p-4 border-2 border-gray-200 rounded-xl hover:border-black transition-all text-center">
+                        <div class="font-bold">THB 19,602</div>
+                        <div class="text-xs text-gray-500" data-i18n="payment.thb">Thai Baht</div>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script>
-        // Language Toggle System
-        let currentLang = 'en';
+    <!-- VERIFICATION MODAL -->
+    <div id="verify-modal" class="fixed inset-0 z-[60] bg-black/95 hidden flex-col items-center justify-center">
+        <div class="w-64 h-64 border-2 border-green-500 rounded-3xl relative overflow-hidden mb-8">
+            <div id="scan-line" class="absolute w-full h-0.5 bg-green-500" style="top: 0; animation: scan 2s ease-in-out infinite;"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <i class="fas fa-fingerprint text-green-500/20" style="font-size: 120px;"></i>
+            </div>
+        </div>
         
+        <h2 class="text-white text-3xl font-black mb-6" data-i18n="verify.title">VERIFYING ACCESS</h2>
+        <div class="font-mono text-sm text-white/50 mb-8">REQ: MODULE-0000</div>
+        
+        <div class="space-y-4 text-white" id="verify-steps">
+            <div class="flex items-center gap-3"><i class="fas fa-circle-notch fa-spin"></i><span data-i18n="verify.step1">Checking Genesis Pass...</span></div>
+            <div class="flex items-center gap-3"><i class="fas fa-circle-notch fa-spin"></i><span data-i18n="verify.step2">Verifying DID...</span></div>
+            <div class="flex items-center gap-3"><i class="fas fa-circle-notch fa-spin"></i><span data-i18n="verify.step3">Granting Access...</span></div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="fixed bottom-8 right-8 bg-black text-white px-6 py-4 rounded-xl hidden items-center gap-3 z-[100]">
+        <i class="fas fa-check-circle" id="toast-icon"></i>
+        <span id="toast-message">Success</span>
+    </div>
+
+    <script>
+        // ==================== 完整的双语翻译系统 ====================
+        const translations = {
+            en: {
+                // Login Page
+                'login.title': 'Unified Access',
+                'login.subtitle': 'Connect to the Ecosystem',
+                'login.magic': 'Magic Link',
+                
+                // Connecting
+                'connecting.title': 'Connecting ID',
+                'connecting.step1': 'Requesting signature...',
+                'connecting.step2': 'Verifying identity...',
+                'connecting.step3': 'Creating session...',
+                
+                // Sidebar
+                'sidebar.connected': 'Connected',
+                'sidebar.mainWallet': 'Main Wallet',
+                'sidebar.coreSystem': 'Core System',
+                'sidebar.genesis': 'Genesis',
+                'sidebar.getAIF': 'Get AIF',
+                'sidebar.captain': 'Captain',
+                'sidebar.settlement': 'Settlement',
+                'sidebar.identity': 'Identity',
+                'sidebar.assets': 'Assets',
+                'sidebar.ecosystem': 'Ecosystem',
+                'sidebar.academy': 'Academy',
+                'sidebar.disconnect': 'Disconnect',
+                
+                // Breadcrumb
+                'breadcrumb.genesis': 'Genesis',
+                'breadcrumb.purchase': 'Purchase',
+                'breadcrumb.captain': 'Captain Plan',
+                'breadcrumb.settlement': 'Settlement',
+                'breadcrumb.did': 'DID Identity',
+                'breadcrumb.wallet': 'Wallet',
+                
+                // Purchase Page
+                'purchase.title': 'GET AIF ACCESS',
+                'purchase.subtitle': 'Join AIFID Ecosystem',
+                'purchase.packageTitle': 'AIF GENESIS PACKAGE',
+                'purchase.currentPrice': 'CURRENT PRICE',
+                'purchase.progress': 'Batch 1 Progress',
+                'purchase.priceRule': 'Price Rule:',
+                'purchase.priceRuleDesc': 'Every 1,000 sales → +$0.005 increase',
+                'purchase.nextBatch': 'Next Batch:',
+                'purchase.purchaseNow': 'Purchase Now',
+                
+                // Captain Plan
+                'captain.title': 'CAPTAIN PLAN',
+                'captain.subtitle': 'Matrix 2x2x2 - Seven Person Team',
+                'captain.createTeam': 'Create Team',
+                'captain.teams': 'Teams',
+                'captain.completed': 'Completed',
+                'captain.direct': 'Direct',
+                'captain.royalty': 'Royalty',
+                'captain.total': 'Total',
+                'captain.noTeams': 'No Teams Yet',
+                'captain.clickCreate': 'Click "Create Team" to start',
+                'captain.revenue': 'Revenue',
+                'captain.completedTeams': '成團',
+                'captain.income': '收入',
+                'captain.forming': '成團中',
+                'captain.expected': '預計',
+                'captain.addForming': '+組建',
+                'captain.complete': '完成',
+                'captain.getReferral': '獲取推薦鏈接',
+                
+                // Settlement
+                'settlement.title': 'SETTLEMENT CENTER',
+                'settlement.subtitle': 'Revenue Tracking & Ledger',
+                'settlement.totalRevenue': 'Total Revenue',
+                'settlement.directIncome': 'Direct',
+                'settlement.royaltyIncome': 'Royalty',
+                'settlement.completedTeams': 'Completed',
+                'settlement.teamSize': 'Team Size',
+                'settlement.ledger': 'Transaction Ledger',
+                'settlement.noTransactions': 'No transactions yet',
+                'settlement.directCommission': 'Direct Commission',
+                'settlement.teamRoyalty': 'Team Royalty',
+                
+                // DID
+                'did.title': 'DID IDENTITY',
+                'did.subtitle': 'Digital Identity Management',
+                'did.identityHolder': 'Identity Holder',
+                'did.genesisHolder': 'Genesis Holder',
+                'did.tierAccess': 'Tier 1 Access',
+                'did.kycVerified': 'KYC Verified',
+                'did.level2': 'Level 2',
+                'did.walletLinked': 'Wallet Linked',
+                'did.identityStats': 'Identity Stats',
+                'did.teamsCreated': 'Teams Created',
+                'did.networkSize': 'Network Size',
+                'did.completedTeams': 'Completed Teams',
+                'did.totalEarnings': 'Total Earnings',
+                
+                // Wallet
+                'wallet.title': 'WALLET MANAGEMENT',
+                'wallet.subtitle': 'Asset Overview',
+                'wallet.totalBalance': 'Total Balance',
+                'wallet.network': 'Network: Ethereum Mainnet',
+                
+                // HKAIFA
+                'hkaifa.title': 'HKAIFA - AI Film Academy',
+                'hkaifa.subtitle': 'Professional AI Filmmaking Education',
+                'hkaifa.about': 'About the Academy',
+                'hkaifa.aboutDesc': 'World\'s first professional AI filmmaking academy, dedicated to培养 next generation creators.',
+                'hkaifa.courses': 'Courses & Programs',
+                'hkaifa.fundamentals': 'AI Fundamentals',
+                'hkaifa.fundamentalsDesc': '12-week intro course',
+                'hkaifa.advanced': 'Advanced Production',
+                'hkaifa.advancedDesc': 'Master-level training',
+                'hkaifa.director': 'Director Masterclass',
+                'hkaifa.directorDesc': 'Pro certification',
+                'hkaifa.enrollment': 'Enrollment',
+                'hkaifa.req1': 'Genesis NFT Holder (Required)',
+                'hkaifa.req2': 'Portfolio for advanced courses',
+                'hkaifa.enrollNow': 'Enroll Now',
+                
+                // Modals
+                'modal.referralTitle': 'Your Referral Link',
+                'modal.shareLink': 'Share this link:',
+                'modal.howItWorks': 'How it works:',
+                'modal.step1': '• Share link with friends',
+                'modal.step2': '• They connect wallet & purchase',
+                'modal.step3': '• Auto-bind to your slot',
+                'modal.step4': '• You earn commission instantly',
+                'modal.gotIt': 'Got it!',
+                
+                // Payment Modal
+                'payment.title': 'Complete Purchase',
+                'payment.package': 'AIF Genesis Package - $600.00',
+                'payment.package2': 'Package',
+                'payment.networkFee': 'Network Fee',
+                'payment.total': 'Total',
+                'payment.cryptoTitle': 'Crypto Payment',
+                'payment.receivingAddress': 'Receiving Address',
+                'payment.scanQR': 'Scan QR to pay',
+                'payment.paid': 'I\'ve Paid',
+                'payment.fiatTitle': 'Fiat Payment (Stripe)',
+                'payment.hkd': 'Hong Kong Dollar',
+                'payment.usd': 'US Dollar',
+                'payment.jpy': 'Japanese Yen',
+                'payment.sgd': 'Singapore Dollar',
+                'payment.gbp': 'British Pound',
+                'payment.eur': 'Euro',
+                'payment.aed': 'UAE Dirham',
+                'payment.thb': 'Thai Baht',
+                
+                // Verification
+                'verify.title': 'VERIFYING ACCESS',
+                'verify.step1': 'Checking Genesis Pass...',
+                'verify.step2': 'Verifying DID...',
+                'verify.step3': 'Granting Access...',
+                
+                // Toasts
+                'toast.welcome': 'Welcome to AIFID!',
+                'toast.copied': 'Copied!',
+                'toast.paymentSuccess': 'Payment confirmed! 10,000 AIF added',
+                'toast.moduleActivated': 'Module activated!',
+                'toast.teamCreated': 'Team created!',
+                'toast.memberActivated': 'Member activated!',
+                'toast.teamCompleted': 'Team completed!',
+                'toast.referralCopied': 'Referral link copied!',
+                'toast.moduleLocked': 'Module locked',
+                'toast.languageEn': 'Language: English',
+                'toast.formingAdded': 'Forming team added',
+                'toast.noFormingTeams': 'No forming teams!'
+            },
+            zh: {
+                // 登錄頁面
+                'login.title': '統一訪問',
+                'login.subtitle': '連接到生態系統',
+                'login.magic': '魔法鏈接',
+                
+                // 連接中
+                'connecting.title': '連接身份中',
+                'connecting.step1': '請求簽名中...',
+                'connecting.step2': '驗證身份中...',
+                'connecting.step3': '創建會話中...',
+                
+                // 側邊欄
+                'sidebar.connected': '已連接',
+                'sidebar.mainWallet': '主錢包',
+                'sidebar.coreSystem': '核心系統',
+                'sidebar.genesis': '創世',
+                'sidebar.getAIF': '獲取 AIF',
+                'sidebar.captain': '船長計劃',
+                'sidebar.settlement': '結算中心',
+                'sidebar.identity': '身份',
+                'sidebar.assets': '資產',
+                'sidebar.ecosystem': '生態系統',
+                'sidebar.academy': '學院',
+                'sidebar.disconnect': '斷開連接',
+                
+                // 面包屑
+                'breadcrumb.genesis': '創世',
+                'breadcrumb.purchase': '購買',
+                'breadcrumb.captain': '船長計劃',
+                'breadcrumb.settlement': '結算中心',
+                'breadcrumb.did': 'DID 身份',
+                'breadcrumb.wallet': '錢包',
+                
+                // 購買頁面
+                'purchase.title': '獲取 AIF 訪問權',
+                'purchase.subtitle': '加入 AIFID 生態系統',
+                'purchase.packageTitle': 'AIF 創世套餐',
+                'purchase.currentPrice': '當前價格',
+                'purchase.progress': '第一批進度',
+                'purchase.priceRule': '價格規則：',
+                'purchase.priceRuleDesc': '每售出 1,000 份 → 價格上漲 $0.005',
+                'purchase.nextBatch': '下一批：',
+                'purchase.purchaseNow': '立即購買',
+                
+                // 船長計劃
+                'captain.title': '船長計劃',
+                'captain.subtitle': '矩陣 2x2x2 - 七人團隊',
+                'captain.createTeam': '創建團隊',
+                'captain.teams': '團隊',
+                'captain.completed': '已完成',
+                'captain.direct': '直推',
+                'captain.royalty': '分紅',
+                'captain.total': '總計',
+                'captain.noTeams': '還沒有團隊',
+                'captain.clickCreate': '點擊"創建團隊"開始',
+                'captain.revenue': '收入',
+                'captain.completedTeams': '成團',
+                'captain.income': '收入',
+                'captain.forming': '成團中',
+                'captain.expected': '預計',
+                'captain.addForming': '+組建',
+                'captain.complete': '完成',
+                'captain.getReferral': '獲取推薦鏈接',
+                
+                // 結算
+                'settlement.title': '結算中心',
+                'settlement.subtitle': '收入追蹤與賬本',
+                'settlement.totalRevenue': '總收入',
+                'settlement.directIncome': '直推收入',
+                'settlement.royaltyIncome': '分紅收入',
+                'settlement.completedTeams': '已完成',
+                'settlement.teamSize': '團隊規模',
+                'settlement.ledger': '交易賬本',
+                'settlement.noTransactions': '暫無交易記錄',
+                'settlement.directCommission': '直推佣金',
+                'settlement.teamRoyalty': '團隊分紅',
+                
+                // DID
+                'did.title': 'DID 身份',
+                'did.subtitle': '數字身份管理',
+                'did.identityHolder': '身份持有者',
+                'did.genesisHolder': '創世持有者',
+                'did.tierAccess': '第一級訪問',
+                'did.kycVerified': 'KYC 已驗證',
+                'did.level2': '等級 2',
+                'did.walletLinked': '錢包已連接',
+                'did.identityStats': '身份統計',
+                'did.teamsCreated': '創建的團隊',
+                'did.networkSize': '網絡規模',
+                'did.completedTeams': '完成的團隊',
+                'did.totalEarnings': '總收入',
+                
+                // 錢包
+                'wallet.title': '錢包管理',
+                'wallet.subtitle': '資產概覽',
+                'wallet.totalBalance': '總餘額',
+                'wallet.network': '網絡：以太坊主網',
+                
+                // HKAIFA
+                'hkaifa.title': 'HKAIFA - AI 電影學院',
+                'hkaifa.subtitle': '專業 AI 電影製作教育',
+                'hkaifa.about': '關於學院',
+                'hkaifa.aboutDesc': '全球首個專業 AI 電影製作學院，致力於培養下一代創作者。',
+                'hkaifa.courses': '課程與項目',
+                'hkaifa.fundamentals': 'AI 基礎',
+                'hkaifa.fundamentalsDesc': '12週入門課程',
+                'hkaifa.advanced': '高級製作',
+                'hkaifa.advancedDesc': '大師級培訓',
+                'hkaifa.director': '導演大師班',
+                'hkaifa.directorDesc': '專業認證',
+                'hkaifa.enrollment': '報名要求',
+                'hkaifa.req1': '創世 NFT 持有者（必需）',
+                'hkaifa.req2': '高級課程需要作品集',
+                'hkaifa.enrollNow': '立即報名',
+                
+                // 模態框
+                'modal.referralTitle': '您的推薦鏈接',
+                'modal.shareLink': '分享此鏈接：',
+                'modal.howItWorks': '工作原理：',
+                'modal.step1': '• 與朋友分享鏈接',
+                'modal.step2': '• 他們連接錢包並購買',
+                'modal.step3': '• 自動綁定到您的槽位',
+                'modal.step4': '• 您立即獲得佣金',
+                'modal.gotIt': '知道了！',
+                
+                // 支付模態框
+                'payment.title': '完成購買',
+                'payment.package': 'AIF 創世套餐 - $600.00',
+                'payment.package2': '套餐',
+                'payment.networkFee': '網絡費用',
+                'payment.total': '總計',
+                'payment.cryptoTitle': '加密貨幣支付',
+                'payment.receivingAddress': '接收地址',
+                'payment.scanQR': '掃描二維碼支付',
+                'payment.paid': '我已支付',
+                'payment.fiatTitle': '法幣支付 (Stripe)',
+                'payment.hkd': '港幣',
+                'payment.usd': '美元',
+                'payment.jpy': '日元',
+                'payment.sgd': '新加坡元',
+                'payment.gbp': '英鎊',
+                'payment.eur': '歐元',
+                'payment.aed': '阿聯酋迪拉姆',
+                'payment.thb': '泰銖',
+                
+                // 驗證
+                'verify.title': '驗證訪問中',
+                'verify.step1': '檢查創世通行證...',
+                'verify.step2': '驗證 DID...',
+                'verify.step3': '授予訪問權限...',
+                
+                // 提示
+                'toast.welcome': '歡迎來到 AIFID！',
+                'toast.copied': '已複製！',
+                'toast.paymentSuccess': '支付確認！已添加 10,000 AIF',
+                'toast.moduleActivated': '模塊已激活！',
+                'toast.teamCreated': '團隊已創建！',
+                'toast.memberActivated': '成員已激活！',
+                'toast.teamCompleted': '團隊已完成！',
+                'toast.referralCopied': '推薦鏈接已複製！',
+                'toast.moduleLocked': '模塊已鎖定',
+                'toast.languageZh': '語言：繁體中文',
+                'toast.formingAdded': '組建中團隊已添加',
+                'toast.noFormingTeams': '沒有組建中的團隊！'
+            }
+        };
+
+        // ==================== WALLET ADDRESSES ====================
+        const WALLET_ADDRESSES = {
+            'USDT-SOL': '3QBgQiHC743ER9beX74bp8K7xrURQR2t5myfcG6tSTLv',
+            'USDC-SOL': '3QBgQiHC743ER9beX74bp8K7xrURQR2t5myfcG6tSTLv',
+            'USDT-BSC': '0xc059dc798ec9f31e765d9cccffd2c62b993857c9',
+            'USDC-BSC': '0xc059dc798ec9f31e765d9cccffd2c62b993857c9'
+        };
+
+        // ==================== STATE ====================
+        const state = {
+            lang: 'en',
+            currentView: 'purchase',
+            walletAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1',
+            aifBalance: 0,
+            modules: { hkaifa: false },
+            currentReferralSlot: null
+        };
+
+        const CAPTAIN_CONFIG = {
+            packagePrice: 600,
+            a1DirectRate: 0.20,
+            a2DirectRate: 0.80,
+            teamRoyaltyRate: 0.10
+        };
+
+        const captainState = {
+            teams: [],
+            revenue: { 
+                direct: 0,
+                royalty: 0,
+                total: 0 
+            },
+            totalCompletedTeams: 0,
+            totalFormingTeams: 0,
+            downline: { count: 0, size: 0 }
+        };
+
+        // ==================== 語言切換函數 ====================
+        function t(key) {
+            return translations[state.lang][key] || key;
+        }
+
+        function updateLanguage() {
+            // 更新所有data-i18n元素
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.textContent = t(key);
+            });
+            
+            // 重新渲染當前視圖
+            renderView(state.currentView);
+        }
+
         function toggleLanguage() {
-            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            state.lang = state.lang === 'en' ? 'zh' : 'en';
+            const btnText = state.lang === 'en' ? 'EN / 繁' : '繁 / EN';
+            document.getElementById('lang-btn').textContent = btnText;
+            document.getElementById('sidebar-lang').textContent = btnText;
             
-            // Toggle Classes
-            const zhEls = document.querySelectorAll('.lang-zh');
-            const enEls = document.querySelectorAll('.lang-en');
+            updateLanguage();
             
-            zhEls.forEach(el => {
-                if(currentLang === 'zh') el.classList.add('active');
-                else el.classList.remove('active');
-            });
+            showToast(state.lang === 'en' ? t('toast.languageEn') : t('toast.languageZh'), 'success');
+        }
+
+        // ==================== LOGIN ====================
+        function connectWallet(type) {
+            document.getElementById('connecting-overlay').classList.remove('hidden');
+            document.getElementById('connecting-overlay').classList.add('flex');
             
-            enEls.forEach(el => {
-                if(currentLang === 'en') el.classList.add('active');
-                else el.classList.remove('active');
-            });
-
-            // Update Button Text
-            const btnText = document.getElementById('current-lang-text');
-            if(btnText) btnText.innerText = currentLang.toUpperCase();
-        }
-
-        // Mobile Menu
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            menu.classList.toggle('hidden');
-            menu.classList.toggle('flex');
-            document.body.style.overflow = menu.classList.contains('flex') ? 'hidden' : 'auto';
-        }
-
-        // Modal
-        function openWhitepaperModal() {
-            document.getElementById('whitepaper-modal').classList.remove('hidden');
-        }
-        function closeWhitepaperModal() {
-            document.getElementById('whitepaper-modal').classList.add('hidden');
-        }
-
-        // Reveal Animation
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.reveal-text').forEach(el => observer.observe(el));
-
-        // Compliance Modal Logic
-        const complianceChecks = document.querySelectorAll('.compliance-check');
-        const complianceBtn = document.getElementById('complianceBtn');
-        const complianceModal = document.getElementById('complianceModal');
-        const mainBody = document.getElementById('mainBody');
-
-        complianceChecks.forEach(check => {
-            check.addEventListener('change', validateCompliance);
-        });
-
-        function validateCompliance() {
-            const allChecked = Array.from(complianceChecks).every(c => c.checked);
-            complianceBtn.disabled = !allChecked;
-        }
-
-        function acceptCompliance() {
-            complianceModal.style.opacity = '0';
-            complianceModal.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => updateStep(0), 1000);
+            setTimeout(() => updateStep(1), 2000);
             setTimeout(() => {
-                complianceModal.classList.add('hidden');
-                // Enable scrolling on body
-                mainBody.classList.remove('overflow-hidden');
-            }, 500);
+                updateStep(2);
+                setTimeout(() => {
+                    document.getElementById('login-view').style.display = 'none';
+                    document.getElementById('connecting-overlay').classList.add('hidden');
+                    document.getElementById('app-shell').classList.remove('hidden');
+                    switchView('purchase');
+                    showToast(t('toast.welcome'), 'success');
+                }, 800);
+            }, 3000);
         }
+
+        function updateStep(index) {
+            const steps = ['step-1', 'step-2', 'step-3'];
+            const el = document.getElementById(steps[index]);
+            el.querySelector('i').className = 'fas fa-check-circle text-green-500';
+        }
+
+        function logout() {
+            if (confirm('Disconnect wallet?')) location.reload();
+        }
+
+        // ==================== NAVIGATION ====================
+        function switchView(view) {
+            state.currentView = view;
+            
+            document.querySelectorAll('[id^="nav-"]').forEach(btn => {
+                btn.classList.remove('bg-gray-100', 'text-black');
+                btn.classList.add('text-gray-500');
+            });
+            
+            const btn = document.getElementById('nav-' + view);
+            if (btn) {
+                btn.classList.add('bg-gray-100', 'text-black');
+                btn.classList.remove('text-gray-500');
+            }
+            
+            const breadcrumbSub = document.getElementById('breadcrumb-sub');
+            if (breadcrumbSub) {
+                const viewNames = {
+                    'purchase': 'breadcrumb.purchase',
+                    'captain': 'breadcrumb.captain',
+                    'settlement': 'breadcrumb.settlement',
+                    'did': 'breadcrumb.did',
+                    'wallet': 'breadcrumb.wallet'
+                };
+                breadcrumbSub.textContent = t(viewNames[view] || 'breadcrumb.purchase');
+            }
+            
+            renderView(view);
+        }
+
+        function toggleSubmenu(id) {
+            const menu = document.getElementById('submenu-' + id);
+            const arrow = document.getElementById('arrow-' + id);
+            menu.classList.toggle('open');
+            arrow.classList.toggle('rotate-180');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // ==================== VIEWS RENDER ====================
+        function renderView(view) {
+            const container = document.getElementById('content-container');
+            
+            if (view === 'purchase') {
+                container.innerHTML = `
+                    <div class="max-w-4xl">
+                        <h1 class="text-6xl font-black mb-4">${t('purchase.title')}</h1>
+                        <p class="text-xl text-gray-600 mb-8">${t('purchase.subtitle')}</p>
+
+                        <div class="bg-white border-2 border-gray-200 rounded-3xl p-10">
+                            <div class="text-center mb-8">
+                                <div class="w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                                    <i class="fas fa-gem text-5xl text-white"></i>
+                                </div>
+                                <h2 class="text-4xl font-black mb-2">${t('purchase.packageTitle')}</h2>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-6 mb-10">
+                                <div class="bg-gray-50 rounded-2xl p-6 text-center">
+                                    <i class="fas fa-coins text-4xl text-yellow-500 mb-4"></i>
+                                    <div class="font-black text-xl">10,000 AIF</div>
+                                </div>
+                                <div class="bg-gray-50 rounded-2xl p-6 text-center">
+                                    <i class="fas fa-chess-queen text-4xl text-red-500 mb-4"></i>
+                                    <div class="font-black text-xl">${t('captain.title')}</div>
+                                </div>
+                                <div class="bg-gray-50 rounded-2xl p-6 text-center">
+                                    <i class="fas fa-network-wired text-4xl text-blue-500 mb-4"></i>
+                                    <div class="font-black text-xl">Matrix Slot</div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gray-50 rounded-3xl p-10 text-center">
+                                <div class="text-sm text-gray-400 font-mono mb-3">${t('purchase.currentPrice')}</div>
+                                <div class="text-8xl font-black font-mono mb-8">$600<span class="text-4xl">.00</span></div>
+                                
+                                <div class="mb-6">
+                                    <div class="flex justify-between text-sm font-mono mb-3">
+                                        <span>${t('purchase.progress')}</span>
+                                        <span class="font-bold">2,019 / 3,000</span>
+                                    </div>
+                                    <div class="h-4 bg-gray-300 rounded-full overflow-hidden">
+                                        <div class="h-full bg-green-600" style="width: 67.3%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-yellow-50 border-2 border-yellow-400 rounded-2xl p-6 text-left mb-8">
+                                    <div class="flex gap-4">
+                                        <i class="fas fa-info-circle text-yellow-600 text-2xl"></i>
+                                        <div>
+                                            <div class="font-black mb-2">${t('purchase.priceRule')}</div>
+                                            <div class="text-sm text-gray-700 mb-2">${t('purchase.priceRuleDesc')}</div>
+                                            <div class="text-sm">${t('purchase.nextBatch')} <strong class="text-yellow-600">$650.00</strong></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button onclick="openPaymentModal()" class="w-full py-5 bg-black hover:bg-gray-900 text-white rounded-2xl font-black text-xl">
+                                    <i class="fas fa-shopping-cart mr-2"></i>${t('purchase.purchaseNow')}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (view === 'captain') {
+                container.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-8">
+                            <div>
+                                <h1 class="text-5xl font-black mb-3">${t('captain.title')}</h1>
+                                <p class="text-lg text-gray-600">${t('captain.subtitle')}</p>
+                            </div>
+                            <div class="flex gap-3">
+                                <button onclick="createNewTeam()" class="px-6 py-3 bg-black text-white rounded-xl font-bold">
+                                    <i class="fas fa-plus mr-2"></i>${t('captain.createTeam')}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="captain-stats" class="grid grid-cols-5 gap-6 mb-8">
+                            <div class="bg-white border-2 border-gray-200 rounded-xl p-6">
+                                <div class="text-sm text-gray-500 mb-2">${t('captain.teams')}</div>
+                                <div class="text-4xl font-black">${captainState.teams.length}</div>
+                            </div>
+                            <div class="bg-white border-2 border-gray-200 rounded-xl p-6">
+                                <div class="text-sm text-gray-500 mb-2">${t('captain.completed')}</div>
+                                <div class="text-4xl font-black">${captainState.totalCompletedTeams}</div>
+                            </div>
+                            <div class="bg-white border-2 border-gray-200 rounded-xl p-6">
+                                <div class="text-sm text-gray-500 mb-2">${t('captain.direct')}</div>
+                                <div class="text-4xl font-black">$${captainState.revenue.direct}</div>
+                            </div>
+                            <div class="bg-white border-2 border-gray-200 rounded-xl p-6">
+                                <div class="text-sm text-gray-500 mb-2">${t('captain.royalty')}</div>
+                                <div class="text-4xl font-black">$${captainState.revenue.royalty}</div>
+                            </div>
+                            <div class="bg-gradient-to-br from-black to-gray-800 text-white rounded-xl p-6">
+                                <div class="text-sm opacity-70 mb-2">${t('captain.total')}</div>
+                                <div class="text-4xl font-black">$${captainState.revenue.total}</div>
+                            </div>
+                        </div>
+
+                        <div id="teams-container">
+                            ${captainState.teams.length === 0 ? `
+                                <div class="text-center py-20">
+                                    <i class="fas fa-chess-queen text-6xl text-gray-300 mb-4"></i>
+                                    <div class="font-bold text-gray-600 mb-2">${t('captain.noTeams')}</div>
+                                    <div class="text-sm text-gray-400">${t('captain.clickCreate')}</div>
+                                </div>
+                            ` : captainState.teams.map((team, idx) => renderTeam(team, idx)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            else if (view === 'settlement') {
+                let ledger = [];
+                captainState.teams.forEach((team) => {
+                    team.slots.forEach((slot) => {
+                        if (slot.id === 0) return;
+                        
+                        if (slot.filled && (slot.role === 'A1' || slot.role === 'A2')) {
+                            const commission = slot.role === 'A1' ? 
+                                CAPTAIN_CONFIG.packagePrice * CAPTAIN_CONFIG.a1DirectRate :
+                                CAPTAIN_CONFIG.packagePrice * CAPTAIN_CONFIG.a2DirectRate;
+                            
+                            ledger.push({
+                                type: t('settlement.directCommission'),
+                                slot: slot.role,
+                                team: team.name,
+                                amount: commission
+                            });
+                        }
+                        
+                        if (slot.subTeams && slot.subTeams.completed > 0) {
+                            for (let i = 0; i < slot.subTeams.completed; i++) {
+                                ledger.push({
+                                    type: t('settlement.teamRoyalty'),
+                                    slot: slot.role,
+                                    team: team.name,
+                                    amount: CAPTAIN_CONFIG.packagePrice * 7 * CAPTAIN_CONFIG.teamRoyaltyRate
+                                });
+                            }
+                        }
+                    });
+                });
+
+                container.innerHTML = `
+                    <div>
+                        <h1 class="text-5xl font-black mb-3">${t('settlement.title')}</h1>
+                        <p class="text-lg text-gray-600 mb-8">${t('settlement.subtitle')}</p>
+
+                        <div class="grid grid-cols-5 gap-6 mb-8">
+                            <div class="bg-gradient-to-br from-black to-gray-900 text-white rounded-2xl p-6">
+                                <div class="text-sm opacity-70 mb-2">${t('settlement.totalRevenue')}</div>
+                                <div class="text-4xl font-black">$${captainState.revenue.total}</div>
+                            </div>
+                            <div class="bg-white border-2 border-gray-200 rounded-2xl p-6">
+                                <div class="text-sm text-gray-500 mb-2">${t('settlement.directIncome')}</div>
+                                <div class="text-4xl font-black">$${captainState.revenue.direct}</div>
+                            </div>
+                            <div class="bg-white border-2 border-gray-200 rounded-2xl p-6">
+                                <div class="text-sm text-gray-500 mb-2">${t('settlement.royaltyIncome')}</div>
+                                <div class="text-4xl font-black">$${captainState.revenue.royalty}</div>
+                            </div>
+                            <div class="bg-white border-2 border-gray-200 rounded-2xl p-6">
+                                <div class="text-sm text-gray-500 mb-2">${t('settlement.completedTeams')}</div>
+                                <div class="text-4xl font-black">${captainState.totalCompletedTeams}</div>
+                            </div>
+                            <div class="bg-white border-2 border-gray-200 rounded-2xl p-6">
+                                <div class="text-sm text-gray-500 mb-2">${t('settlement.teamSize')}</div>
+                                <div class="text-4xl font-black">${captainState.downline.size}</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white border-2 border-gray-200 rounded-3xl overflow-hidden">
+                            <div class="px-8 py-6 border-b-2 border-gray-200 bg-gray-50">
+                                <h2 class="text-2xl font-black">${t('settlement.ledger')}</h2>
+                            </div>
+                            <div class="p-8">
+                                ${ledger.length === 0 ? `
+                                    <div class="text-center py-12">
+                                        <i class="fas fa-receipt text-6xl text-gray-300 mb-4"></i>
+                                        <div class="font-bold text-gray-600">${t('settlement.noTransactions')}</div>
+                                    </div>
+                                ` : `
+                                    <div class="space-y-4">
+                                        ${ledger.map((tx) => `
+                                            <div class="transaction-item">
+                                                <div class="flex items-center gap-4">
+                                                    <div class="w-12 h-12 ${tx.type === t('settlement.directCommission') ? 'bg-blue-50' : 'bg-green-50'} rounded-lg flex items-center justify-center">
+                                                        <i class="fas ${tx.type === t('settlement.directCommission') ? 'fa-user-plus text-blue-600' : 'fa-users text-green-600'}"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="font-bold">${tx.type}</div>
+                                                        <div class="text-sm text-gray-500">${tx.team} - ${tx.slot}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="text-2xl font-black text-green-600">+$${tx.amount}</div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (view === 'did') {
+                container.innerHTML = `
+                    <div>
+                        <h1 class="text-5xl font-black mb-3">${t('did.title')}</h1>
+                        <p class="text-lg text-gray-600 mb-8">${t('did.subtitle')}</p>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                            <div class="did-card">
+                                <div class="card-pattern"></div>
+                                
+                                <div class="relative z-10 h-full flex flex-col justify-between">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-12 h-12 bg-yellow-400 rounded-xl flex items-center justify-center text-black font-black text-lg">ID</div>
+                                            <div class="text-white font-black text-xl">AIFID</div>
+                                        </div>
+                                        <div class="text-white/40 text-sm font-mono">v2.0</div>
+                                    </div>
+
+                                    <div class="w-16 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg"></div>
+
+                                    <div>
+                                        <div class="text-white/60 text-xs mb-2 uppercase tracking-wider">${t('did.identityHolder')}</div>
+                                        <div class="text-white text-3xl font-black mb-3">COMMANDER</div>
+                                        <div class="text-white/80 font-mono text-xs mb-4">DID: did:aifid:742d...bEb1</div>
+                                        <div class="flex gap-2">
+                                            <div class="px-3 py-1 bg-green-500/20 border border-green-500 text-green-400 text-xs rounded-full font-bold">GENESIS</div>
+                                            <div class="px-3 py-1 bg-blue-500/20 border border-blue-500 text-blue-400 text-xs rounded-full font-bold">KYC L2</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="bg-white border-2 border-gray-200 rounded-2xl p-6 hover:border-purple-500 transition-all">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-14 h-14 bg-purple-50 rounded-xl flex items-center justify-center">
+                                            <i class="fas fa-gem text-purple-600 text-2xl"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="font-bold text-lg">${t('did.genesisHolder')}</div>
+                                            <div class="text-xs text-gray-500">${t('did.tierAccess')}</div>
+                                        </div>
+                                        <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                                    </div>
+                                </div>
+
+                                <div class="bg-white border-2 border-gray-200 rounded-2xl p-6 hover:border-blue-500 transition-all">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center">
+                                            <i class="fas fa-user-check text-blue-600 text-2xl"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="font-bold text-lg">${t('did.kycVerified')}</div>
+                                            <div class="text-xs text-gray-500">${t('did.level2')}</div>
+                                        </div>
+                                        <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                                    </div>
+                                </div>
+
+                                <div class="bg-white border-2 border-gray-200 rounded-2xl p-6 hover:border-gray-400 transition-all">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-14 h-14 bg-gray-50 rounded-xl flex items-center justify-center">
+                                            <i class="fas fa-wallet text-gray-600 text-2xl"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="font-bold text-lg">${t('did.walletLinked')}</div>
+                                            <div class="text-xs text-gray-500 font-mono">0x742d...bEb1</div>
+                                        </div>
+                                        <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-gray-200 rounded-2xl p-8">
+                            <h3 class="text-2xl font-black mb-6">${t('did.identityStats')}</h3>
+                            <div class="grid grid-cols-4 gap-6">
+                                <div class="text-center">
+                                    <div class="text-4xl font-black mb-2">${captainState.teams.length}</div>
+                                    <div class="text-sm text-gray-600">${t('did.teamsCreated')}</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-4xl font-black mb-2">${captainState.downline.size}</div>
+                                    <div class="text-sm text-gray-600">${t('did.networkSize')}</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-4xl font-black mb-2">${captainState.totalCompletedTeams}</div>
+                                    <div class="text-sm text-gray-600">${t('did.completedTeams')}</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-4xl font-black mb-2">$${captainState.revenue.total}</div>
+                                    <div class="text-sm text-gray-600">${t('did.totalEarnings')}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (view === 'wallet') {
+                container.innerHTML = `
+                    <div>
+                        <h1 class="text-5xl font-black mb-3">${t('wallet.title')}</h1>
+                        <p class="text-lg text-gray-600 mb-8">${t('wallet.subtitle')}</p>
+
+                        <div class="bg-gradient-to-br from-black to-gray-900 text-white rounded-3xl p-10 mb-8">
+                            <div class="text-sm opacity-70 mb-3">${t('wallet.totalBalance')}</div>
+                            <div class="text-7xl font-black font-mono mb-2">$18,750<span class="text-4xl">.00</span></div>
+                            <div class="text-sm opacity-70">${t('wallet.network')}</div>
+                        </div>
+
+                        <div class="grid grid-cols-4 gap-6">
+                            <div class="asset-card">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-dollar-sign text-green-600"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold">USDT</div>
+                                        <div class="text-xs text-gray-500">Tether</div>
+                                    </div>
+                                </div>
+                                <div class="text-3xl font-black">10,500</div>
+                            </div>
+
+                            <div class="asset-card highlight">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-gem"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold">AIF</div>
+                                        <div class="text-xs opacity-80">Token</div>
+                                    </div>
+                                </div>
+                                <div class="text-3xl font-black">${state.aifBalance.toLocaleString()}</div>
+                            </div>
+
+                            <div class="asset-card">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-circle text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold">USDC</div>
+                                        <div class="text-xs text-gray-500">USD Coin</div>
+                                    </div>
+                                </div>
+                                <div class="text-3xl font-black">8,250</div>
+                            </div>
+
+                            <div class="asset-card">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
+                                        <i class="fab fa-ethereum text-purple-600"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold">ETH</div>
+                                        <div class="text-xs text-gray-500">Ethereum</div>
+                                    </div>
+                                </div>
+                                <div class="text-3xl font-black">2.45</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (view === 'hkaifa') {
+                container.innerHTML = `
+                    <div>
+                        <h1 class="text-5xl font-black mb-3">${t('hkaifa.title')}</h1>
+                        <p class="text-lg text-gray-600 mb-8">${t('hkaifa.subtitle')}</p>
+
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200 rounded-3xl p-10 mb-8">
+                            <div class="flex items-start gap-6">
+                                <div class="w-20 h-20 bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-graduation-cap text-white text-4xl"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-3xl font-black mb-3">${t('hkaifa.about')}</h2>
+                                    <p class="text-gray-700 text-lg">${t('hkaifa.aboutDesc')}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h2 class="text-3xl font-black mb-6">${t('hkaifa.courses')}</h2>
+                        <div class="grid grid-cols-3 gap-6 mb-8">
+                            <div class="bg-white border-2 border-gray-200 rounded-2xl p-6 hover:border-purple-500 transition-all">
+                                <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mb-4">
+                                    <i class="fas fa-play-circle text-purple-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-black text-xl mb-3">${t('hkaifa.fundamentals')}</h3>
+                                <p class="text-sm text-gray-600 mb-4">${t('hkaifa.fundamentalsDesc')}</p>
+                                <div class="inline-block px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full">Beginner</div>
+                            </div>
+
+                            <div class="bg-white border-2 border-gray-200 rounded-2xl p-6 hover:border-blue-500 transition-all">
+                                <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
+                                    <i class="fas fa-video text-blue-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-black text-xl mb-3">${t('hkaifa.advanced')}</h3>
+                                <p class="text-sm text-gray-600 mb-4">${t('hkaifa.advancedDesc')}</p>
+                                <div class="inline-block px-3 py-1 bg-yellow-50 text-yellow-700 text-xs font-bold rounded-full">Advanced</div>
+                            </div>
+
+                            <div class="bg-white border-2 border-gray-200 rounded-2xl p-6 hover:border-red-500 transition-all">
+                                <div class="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-4">
+                                    <i class="fas fa-award text-red-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-black text-xl mb-3">${t('hkaifa.director')}</h3>
+                                <p class="text-sm text-gray-600 mb-4">${t('hkaifa.directorDesc')}</p>
+                                <div class="inline-block px-3 py-1 bg-red-50 text-red-700 text-xs font-bold rounded-full">Pro</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white border-2 border-gray-200 rounded-3xl p-10">
+                            <h2 class="text-3xl font-black mb-6">${t('hkaifa.enrollment')}</h2>
+                            <ul class="space-y-4 mb-8">
+                                <li class="flex items-start gap-3">
+                                    <i class="fas fa-check-circle text-green-600 text-xl mt-1"></i>
+                                    <span class="text-lg">${t('hkaifa.req1')}</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="fas fa-check-circle text-green-600 text-xl mt-1"></i>
+                                    <span class="text-lg">${t('hkaifa.req2')}</span>
+                                </li>
+                            </ul>
+
+                            <button class="w-full py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-black text-lg hover:from-purple-700 hover:to-blue-700 transition-all">
+                                <i class="fas fa-rocket mr-2"></i>${t('hkaifa.enrollNow')}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // ==================== CAPTAIN PLAN ====================
+        function createTeamData(num) {
+            return {
+                id: 'TEAM-' + String(num).padStart(3, '0'),
+                name: 'Team ' + num,
+                slots: [
+                    { id: 0, role: 'CAPTAIN', name: 'YOU', filled: true, remark: '' },
+                    { 
+                        id: 1, role: 'A1', name: 'SLOT A1', filled: false, remark: '',
+                        subTeams: { completed: 0, forming: 0, revenue: 0, estimated: 0 },
+                        downlineRevenue: 0
+                    },
+                    { 
+                        id: 2, role: 'A2', name: 'SLOT A2', filled: false, remark: '',
+                        subTeams: { completed: 0, forming: 0, revenue: 0, estimated: 0 },
+                        downlineRevenue: 0
+                    },
+                    { id: 3, role: 'B1', name: 'SLOT B1', filled: false, remark: '', parent: 1, visible: false },
+                    { id: 4, role: 'B2', name: 'SLOT B2', filled: false, remark: '', parent: 1, visible: false },
+                    { id: 5, role: 'B3', name: 'SLOT B3', filled: false, remark: '', parent: 2, visible: false },
+                    { id: 6, role: 'B4', name: 'SLOT B4', filled: false, remark: '', parent: 2, visible: false }
+                ]
+            };
+        }
+
+        function createNewTeam() {
+            const num = captainState.teams.length + 1;
+            captainState.teams.push(createTeamData(num));
+            switchView('captain');
+            showToast(t('toast.teamCreated'), 'success');
+        }
+
+        function renderTeam(team, idx) {
+            const a1 = team.slots[1];
+            const a2 = team.slots[2];
+            
+            return `
+                <div class="bg-white border-2 border-gray-200 rounded-3xl p-8 mb-6">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <h3 class="text-2xl font-black">${team.name}</h3>
+                            <div class="text-sm text-gray-500 font-mono">${team.id}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-gray-500 mb-1">${t('captain.revenue')}</div>
+                            <div class="text-3xl font-black">$${a1.subTeams.revenue + a2.subTeams.revenue + a1.downlineRevenue + a2.downlineRevenue}</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-7 gap-4">
+                        ${renderMatrixNode(team.slots[0], idx, 0)}
+                        <div></div>
+                        ${renderMatrixNode(a1, idx, 1, true)}
+                        <div></div>
+                        ${renderMatrixNode(a2, idx, 2, true)}
+                        <div></div>
+                        <div></div>
+                        ${a1.filled ? renderMatrixNode(team.slots[3], idx, 3) : '<div></div>'}
+                        ${a1.filled ? renderMatrixNode(team.slots[4], idx, 4) : '<div></div>'}
+                        <div></div>
+                        ${a2.filled ? renderMatrixNode(team.slots[5], idx, 5) : '<div></div>'}
+                        ${a2.filled ? renderMatrixNode(team.slots[6], idx, 6) : '<div></div>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMatrixNode(slot, teamIdx, slotIdx, isSuper = false) {
+            if (isSuper && slot.filled) {
+                return `
+                    <div class="col-span-2">
+                        <div class="bg-blue-50 border-2 border-blue-500 rounded-xl p-4 mb-3">
+                            <div class="text-xs text-blue-600 font-bold mb-2">${slot.role} (${slot.role === 'A1' ? '20%' : '80%'})</div>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                    <div class="text-xs text-gray-500">${t('captain.completedTeams')}</div>
+                                    <div class="font-black">${slot.subTeams.completed}</div>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-gray-500">${t('captain.income')}</div>
+                                    <div class="font-black text-green-600">$${slot.subTeams.revenue + slot.downlineRevenue}</div>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-gray-500">${t('captain.forming')}</div>
+                                    <div class="font-black">${slot.subTeams.forming}</div>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-gray-500">${t('captain.expected')}</div>
+                                    <div class="font-black text-gray-400">$${slot.subTeams.estimated}</div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2 mt-3">
+                                <button onclick="addForming(${teamIdx}, ${slotIdx})" class="flex-1 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold">${t('captain.addForming')}</button>
+                                <button onclick="completeTeam(${teamIdx}, ${slotIdx})" class="flex-1 py-2 bg-green-600 text-white rounded-lg text-xs font-bold">${t('captain.complete')}</button>
+                            </div>
+                        </div>
+                        <div class="matrix-node filled">
+                            <i class="fas fa-check-circle text-green-500 node-icon"></i>
+                            <div class="font-bold text-sm">${slot.remark || slot.name}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (isSuper && !slot.filled) {
+                return `
+                    <div class="col-span-2">
+                        <div class="matrix-node" onclick="showReferralLink(${teamIdx}, ${slotIdx})">
+                            <div class="text-xs text-gray-500 mb-2">${slot.role}</div>
+                            <i class="fas fa-share-nodes text-blue-500 node-icon"></i>
+                            <div class="font-bold text-xs text-blue-600">${t('captain.getReferral')}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (slot.id === 0) {
+                return `
+                    <div>
+                        <div class="matrix-node captain">
+                            <i class="fas fa-crown node-icon"></i>
+                            <div class="font-bold text-sm">${slot.name}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div>
+                    <div class="matrix-node ${slot.filled ? 'filled' : ''} ${!slot.filled && slot.visible !== false ? 'cursor-pointer hover:border-black' : ''}" ${!slot.filled && slot.visible !== false ? `onclick="activateSlot(${teamIdx}, ${slotIdx})"` : ''}>
+                        <div class="text-xs text-gray-500 mb-2">${slot.role}</div>
+                        <i class="fas ${slot.filled ? 'fa-check-circle text-green-500' : 'fa-plus text-gray-400'} node-icon"></i>
+                        <div class="font-bold text-xs">${slot.remark || slot.name}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showReferralLink(teamIdx, slotIdx) {
+            const team = captainState.teams[teamIdx];
+            const slot = team.slots[slotIdx];
+            
+            state.currentReferralSlot = { teamIdx, slotIdx };
+            
+            const link = `https://aifid.id/ref/${team.id}-${slot.role}`;
+            document.getElementById('referral-link').value = link;
+            document.getElementById('referral-slot-info').textContent = `${team.name} - ${slot.role}`;
+            
+            document.getElementById('referral-modal').classList.remove('hidden');
+            document.getElementById('referral-modal').classList.add('flex');
+        }
+
+        function closeReferralModal() {
+            document.getElementById('referral-modal').classList.add('hidden');
+            document.getElementById('referral-modal').classList.remove('flex');
+        }
+
+        function copyReferralLink() {
+            const input = document.getElementById('referral-link');
+            input.select();
+            navigator.clipboard.writeText(input.value);
+            showToast(t('toast.referralCopied'), 'success');
+        }
+
+        function activateSlot(teamIdx, slotIdx) {
+            const team = captainState.teams[teamIdx];
+            const slot = team.slots[slotIdx];
+            
+            if (slot.filled) return;
+            
+            slot.filled = true;
+            captainState.downline.size++;
+            
+            if (slot.role === 'A1') {
+                team.slots[3].visible = true;
+                team.slots[4].visible = true;
+                const bonus = CAPTAIN_CONFIG.packagePrice * CAPTAIN_CONFIG.a1DirectRate;
+                captainState.revenue.direct += bonus;
+                captainState.revenue.total += bonus;
+                captainState.downline.count++;
+            } else if (slot.role === 'A2') {
+                team.slots[5].visible = true;
+                team.slots[6].visible = true;
+                const bonus = CAPTAIN_CONFIG.packagePrice * CAPTAIN_CONFIG.a2DirectRate;
+                captainState.revenue.direct += bonus;
+                captainState.revenue.total += bonus;
+                captainState.downline.count++;
+            }
+            
+            switchView('captain');
+            showToast(t('toast.memberActivated'), 'success');
+        }
+
+        function addForming(teamIdx, slotIdx) {
+            const slot = captainState.teams[teamIdx].slots[slotIdx];
+            slot.subTeams.forming++;
+            slot.subTeams.estimated = slot.subTeams.forming * (CAPTAIN_CONFIG.packagePrice * 7 * CAPTAIN_CONFIG.teamRoyaltyRate);
+            captainState.totalFormingTeams++;
+            switchView('captain');
+            showToast(t('toast.formingAdded'), 'success');
+        }
+
+        function completeTeam(teamIdx, slotIdx) {
+            const slot = captainState.teams[teamIdx].slots[slotIdx];
+            
+            if (slot.subTeams.forming === 0) {
+                showToast(t('toast.noFormingTeams'), 'warning');
+                return;
+            }
+            
+            slot.subTeams.forming--;
+            slot.subTeams.completed++;
+            captainState.totalFormingTeams--;
+            captainState.totalCompletedTeams++;
+            
+            const teamRoyalty = CAPTAIN_CONFIG.packagePrice * 7 * CAPTAIN_CONFIG.teamRoyaltyRate;
+            slot.subTeams.revenue += teamRoyalty;
+            slot.subTeams.estimated = slot.subTeams.forming * teamRoyalty;
+            
+            captainState.revenue.royalty += teamRoyalty;
+            captainState.revenue.total += teamRoyalty;
+            
+            calculateUplineRoyalty(teamIdx, slotIdx, teamRoyalty);
+            
+            switchView('captain');
+            showToast(t('toast.teamCompleted') + ' +$' + teamRoyalty, 'success');
+        }
+
+        function calculateUplineRoyalty(teamIdx, slotIdx, amount) {
+            const team = captainState.teams[teamIdx];
+            const slot = team.slots[slotIdx];
+            
+            if (slot.role.startsWith('B')) {
+                const parentIdx = slot.parent;
+                const parentSlot = team.slots[parentIdx];
+                parentSlot.downlineRevenue = (parentSlot.downlineRevenue || 0) + (CAPTAIN_CONFIG.packagePrice * 7 * CAPTAIN_CONFIG.teamRoyaltyRate);
+                captainState.revenue.royalty += (CAPTAIN_CONFIG.packagePrice * 7 * CAPTAIN_CONFIG.teamRoyaltyRate);
+                captainState.revenue.total += (CAPTAIN_CONFIG.packagePrice * 7 * CAPTAIN_CONFIG.teamRoyaltyRate);
+            }
+        }
+
+        // ==================== MODALS ====================
+        function openPaymentModal() {
+            document.getElementById('payment-modal').classList.remove('hidden');
+            document.getElementById('payment-modal').classList.add('flex');
+        }
+
+        function closePaymentModal() {
+            document.getElementById('payment-modal').classList.add('hidden');
+            document.getElementById('payment-modal').classList.remove('flex');
+            document.getElementById('crypto-details').classList.add('hidden');
+        }
+
+        function selectCrypto(currency) {
+            const address = WALLET_ADDRESSES[currency];
+            document.getElementById('crypto-address').value = address;
+            document.getElementById('crypto-details').classList.remove('hidden');
+            showToast('Selected ' + currency, 'success');
+        }
+
+        function copyCryptoAddress() {
+            const input = document.getElementById('crypto-address');
+            input.select();
+            navigator.clipboard.writeText(input.value);
+            showToast(t('toast.copied'), 'success');
+        }
+
+        function confirmPayment() {
+            closePaymentModal();
+            
+            setTimeout(() => {
+                state.aifBalance = 10000;
+                showToast(t('toast.paymentSuccess'), 'success');
+                
+                setTimeout(() => {
+                    switchView('captain');
+                }, 2000);
+            }, 1000);
+        }
+
+        function activateModule(moduleId) {
+            if (state.modules[moduleId]) {
+                switchView(moduleId);
+                return;
+            }
+            
+            const modal = document.getElementById('verify-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            setTimeout(() => {
+                const steps = modal.querySelectorAll('#verify-steps div');
+                steps[0].querySelector('i').className = 'fas fa-check-circle text-green-500';
+            }, 800);
+            
+            setTimeout(() => {
+                const steps = modal.querySelectorAll('#verify-steps div');
+                steps[1].querySelector('i').className = 'fas fa-check-circle text-green-500';
+            }, 1600);
+            
+            setTimeout(() => {
+                const steps = modal.querySelectorAll('#verify-steps div');
+                steps[2].querySelector('i').className = 'fas fa-check-circle text-green-500';
+                
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    
+                    state.modules[moduleId] = true;
+                    
+                    const navBtn = document.getElementById('nav-' + moduleId);
+                    navBtn.querySelector('.module-lock').classList.add('hidden');
+                    navBtn.querySelector('.module-check').classList.remove('hidden');
+                    navBtn.classList.remove('opacity-50');
+                    
+                    showToast(t('toast.moduleActivated'), 'success');
+                    switchView(moduleId);
+                }, 800);
+            }, 2400);
+        }
+
+        // ==================== UTILS ====================
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            const msg = document.getElementById('toast-message');
+            
+            icon.className = type === 'warning' ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle';
+            msg.textContent = message;
+            
+            toast.classList.remove('hidden');
+            toast.classList.add('flex');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('flex');
+            }, 3000);
+        }
+
+        // ==================== 初始化 ====================
+        updateLanguage();
     </script>
 </body>
 </html>
