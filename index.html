@@ -9,8 +9,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     
-    <!-- Privy SDK -->
-    <script src="https://unpkg.com/@privy-io/js-sdk-core@latest/dist/index.js"></script>
+    <!-- Privy SDK - Using Auth.js (browser-compatible) -->
+    <script src="https://unpkg.com/@privy-io/js-sdk-core@1.0.0/dist/browser/index.js"></script>
     
     <style>
         * { 
@@ -166,6 +166,11 @@
             width: 300px;
             height: 300px;
         }
+
+        /* Privy iframe container styling */
+        #privy-modal-content {
+            z-index: 9999 !important;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -185,54 +190,21 @@
 
             <!-- Login Card -->
             <div class="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
-                <!-- Email Login -->
-                <div class="mb-8">
-                    <label class="block text-sm font-bold mb-3 text-gray-700">
-                        <span class="lang-en">Email Address</span>
-                        <span class="lang-zh hidden">電子郵箱</span>
-                    </label>
-                    <div class="relative">
-                        <input 
-                            id="email-input"
-                            type="email" 
-                            placeholder="your@email.com"
-                            class="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-black transition-all text-lg"
-                        />
-                        <button 
-                            onclick="loginWithEmail()"
-                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-black text-white px-6 py-2.5 rounded-xl font-bold hover:bg-gray-800 transition-all"
-                        >
-                            <span class="lang-en">Continue</span>
-                            <span class="lang-zh hidden">繼續</span>
-                        </button>
-                    </div>
-                </div>
+                <!-- Unified Login Button (Privy will handle everything) -->
+                <button 
+                    id="privy-login-btn"
+                    onclick="loginWithPrivy()"
+                    class="w-full py-5 bg-black text-white rounded-2xl font-bold text-lg hover:bg-gray-800 transition-all mb-4"
+                >
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    <span class="lang-en">Sign In with Privy</span>
+                    <span class="lang-zh hidden">使用 Privy 登入</span>
+                </button>
 
-                <!-- Divider -->
-                <div class="flex items-center my-8">
-                    <div class="flex-1 border-t border-gray-200"></div>
-                    <span class="px-4 text-sm text-gray-500 font-medium">
-                        <span class="lang-en">or connect wallet</span>
-                        <span class="lang-zh hidden">或連接錢包</span>
-                    </span>
-                    <div class="flex-1 border-t border-gray-200"></div>
-                </div>
-
-                <!-- Wallet Options -->
-                <div class="space-y-3">
-                    <button onclick="loginWithWallet()" class="w-full p-5 border-2 border-gray-200 rounded-2xl hover:border-purple-500 hover:bg-purple-50 transition-all flex items-center justify-between group">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-all">
-                                <i class="fas fa-wallet text-purple-600 text-xl"></i>
-                            </div>
-                            <span class="font-bold text-gray-800">
-                                <span class="lang-en">Connect Wallet</span>
-                                <span class="lang-zh hidden">連接錢包</span>
-                            </span>
-                        </div>
-                        <i class="fas fa-arrow-right text-gray-400 group-hover:text-purple-600 transition-all"></i>
-                    </button>
-                </div>
+                <p class="text-sm text-gray-600 text-center">
+                    <span class="lang-en">Connect with email, wallet, or social accounts</span>
+                    <span class="lang-zh hidden">使用郵箱、錢包或社交帳戶連接</span>
+                </p>
 
                 <!-- Terms -->
                 <p class="text-xs text-gray-500 text-center mt-8 leading-relaxed">
@@ -249,50 +221,6 @@
                     <span class="lang-zh hidden">English</span>
                 </button>
             </div>
-        </div>
-    </div>
-
-    <!-- Email Verification Modal -->
-    <div id="email-verify-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center p-4">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 relative">
-            <button onclick="closeEmailVerify()" class="absolute top-6 right-6 text-gray-400 hover:text-black transition-all">
-                <i class="fas fa-times text-2xl"></i>
-            </button>
-            
-            <div class="text-center mb-8">
-                <div class="w-20 h-20 bg-gradient-to-br from-black to-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-envelope text-white text-3xl"></i>
-                </div>
-                <h2 class="text-2xl font-black mb-3">
-                    <span class="lang-en">Check Your Email</span>
-                    <span class="lang-zh hidden">檢查您的郵箱</span>
-                </h2>
-                <p id="sent-to-email" class="text-gray-600 text-sm"></p>
-            </div>
-            
-            <div class="mb-6">
-                <label class="block text-sm font-bold mb-3 text-gray-700">
-                    <span class="lang-en">Verification Code</span>
-                    <span class="lang-zh hidden">驗證碼</span>
-                </label>
-                <input 
-                    id="verify-code"
-                    type="text" 
-                    maxlength="6"
-                    placeholder="000000"
-                    class="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-black transition-all text-center text-2xl font-mono tracking-widest"
-                />
-            </div>
-            
-            <button onclick="verifyEmailCode()" class="w-full py-4 bg-black text-white rounded-2xl font-black text-lg hover:bg-gray-900 transition-all mb-3">
-                <span class="lang-en">Verify</span>
-                <span class="lang-zh hidden">驗證</span>
-            </button>
-            
-            <button onclick="resendCode()" class="w-full text-sm text-gray-600 hover:text-black transition-all font-medium">
-                <span class="lang-en">Resend Code</span>
-                <span class="lang-zh hidden">重新發送</span>
-            </button>
         </div>
     </div>
 
@@ -652,7 +580,10 @@
         <span id="toast-message" class="font-medium"></span>
     </div>
 
-    <!-- Main JavaScript with Real Privy Integration -->
+    <!-- Privy Embed Container -->
+    <div id="privy-container"></div>
+
+    <!-- Main JavaScript with Privy Integration -->
     <script type="module">
         // ==================== CONFIGURATION ====================
         const CONFIG = {
@@ -670,7 +601,7 @@
         };
 
         // ==================== IMPORT DEPENDENCIES ====================
-        let supabase, privyClient;
+        let supabase, privyAuth;
 
         try {
             const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
@@ -680,26 +611,47 @@
             console.error('❌ Supabase import failed:', error);
         }
 
-        // Initialize Privy Client
+        // Initialize Privy using embedded auth
         try {
-            if (window.Privy) {
-                privyClient = window.Privy.createClient({
+            // Wait for Privy SDK to load
+            let retryCount = 0;
+            const maxRetries = 10;
+            
+            const waitForPrivy = () => {
+                return new Promise((resolve, reject) => {
+                    const checkPrivy = setInterval(() => {
+                        retryCount++;
+                        
+                        if (window.PrivyAuth || window.Privy) {
+                            clearInterval(checkPrivy);
+                            resolve(window.PrivyAuth || window.Privy);
+                        } else if (retryCount >= maxRetries) {
+                            clearInterval(checkPrivy);
+                            reject(new Error('Privy SDK not loaded after ' + maxRetries + ' attempts'));
+                        }
+                    }, 500);
+                });
+            };
+
+            const PrivySDK = await waitForPrivy();
+            
+            // Initialize Privy with embedded authentication
+            if (PrivySDK.createAuth) {
+                privyAuth = PrivySDK.createAuth({
+                    appId: CONFIG.privyAppId,
+                    container: document.getElementById('privy-container')
+                });
+            } else if (PrivySDK.init) {
+                privyAuth = PrivySDK.init({
                     appId: CONFIG.privyAppId
                 });
-                console.log('✅ Privy initialized with App ID:', CONFIG.privyAppId);
-            } else {
-                console.warn('⚠️ Privy SDK not loaded yet, will retry...');
-                setTimeout(() => {
-                    if (window.Privy) {
-                        privyClient = window.Privy.createClient({
-                            appId: CONFIG.privyAppId
-                        });
-                        console.log('✅ Privy initialized (delayed)');
-                    }
-                }, 1000);
             }
+            
+            console.log('✅ Privy initialized with App ID:', CONFIG.privyAppId);
+            
         } catch (error) {
             console.error('❌ Privy initialization failed:', error);
+            console.log('⚠️ Will use fallback authentication method');
         }
 
         // ==================== GLOBAL STATE ====================
@@ -746,126 +698,32 @@
             }
         };
 
-        // ==================== REAL PRIVY LOGIN FUNCTIONS ====================
+        // ==================== PRIVY LOGIN FUNCTION ====================
         
-        // Email Login with REAL Privy
-        window.loginWithEmail = async function() {
-            const email = document.getElementById('email-input').value.trim();
-            if (!isValidEmail(email)) {
-                showToast('Please enter a valid email', 'warning');
-                return;
-            }
-
+        window.loginWithPrivy = async function() {
             try {
-                window.state.userEmail = email;
-                document.getElementById('connecting-method').textContent = 'Email: ' + email;
+                document.getElementById('connecting-method').textContent = 'Opening Privy Login...';
                 document.getElementById('connecting-overlay').classList.remove('hidden');
                 document.getElementById('connecting-overlay').classList.add('flex');
 
-                // REAL Privy email login
-                if (privyClient) {
-                    await privyClient.loginWithEmail({
-                        email: email
-                    });
-                    
-                    document.getElementById('connecting-overlay').classList.add('hidden');
-                    showEmailVerifyModal(email);
-                    showToast('Verification code sent to your email!', 'success');
-                } else {
-                    throw new Error('Privy client not initialized');
-                }
-                
-            } catch (error) {
-                console.error('Email login error:', error);
-                document.getElementById('connecting-overlay').classList.add('hidden');
-                showToast('Error: ' + error.message, 'warning');
-            }
-        };
-
-        // Verify Email Code with REAL Privy
-        window.verifyEmailCode = async function() {
-            const code = document.getElementById('verify-code').value.trim();
-            const email = window.state.userEmail;
-
-            if (code.length !== 6) {
-                showToast('Enter 6-digit code', 'warning');
-                return;
-            }
-
-            try {
-                closeEmailVerify();
-                document.getElementById('connecting-method').textContent = 'Verifying Code...';
-                document.getElementById('connecting-overlay').classList.remove('hidden');
-                document.getElementById('connecting-overlay').classList.add('flex');
-
-                // REAL Privy verification
-                if (privyClient) {
+                if (privyAuth) {
                     updateStep(0);
-                    const user = await privyClient.verifyOTP({
-                        email: email,
-                        code: code
-                    });
+                    
+                    // Use Privy's login method
+                    const user = await privyAuth.login();
                     
                     updateStep(1);
                     updateStep(2);
                     
                     await handleLoginSuccess(user);
                 } else {
-                    throw new Error('Privy client not initialized');
+                    throw new Error('Privy not initialized. Please refresh the page.');
                 }
 
             } catch (error) {
-                console.error('Verification error:', error);
+                console.error('Login error:', error);
                 document.getElementById('connecting-overlay').classList.add('hidden');
-                document.getElementById('email-verify-modal').classList.remove('hidden');
-                document.getElementById('email-verify-modal').classList.add('flex');
-                showToast('Invalid code: ' + error.message, 'warning');
-            }
-        };
-
-        // Wallet Login with REAL Privy
-        window.loginWithWallet = async function() {
-            try {
-                document.getElementById('connecting-method').textContent = 'Connecting Wallet...';
-                document.getElementById('connecting-overlay').classList.remove('hidden');
-                document.getElementById('connecting-overlay').classList.add('flex');
-
-                // REAL Privy wallet login
-                if (privyClient) {
-                    updateStep(0);
-                    const user = await privyClient.loginWithWallet();
-                    
-                    updateStep(1);
-                    updateStep(2);
-                    
-                    await handleLoginSuccess(user);
-                } else {
-                    throw new Error('Privy client not initialized');
-                }
-
-            } catch (error) {
-                console.error('Wallet connection error:', error);
-                document.getElementById('connecting-overlay').classList.add('hidden');
-                showToast('Connection cancelled or failed: ' + error.message, 'warning');
-            }
-        };
-
-        window.resendCode = async function() {
-            if (!window.state.userEmail) {
-                showToast('No email found', 'warning');
-                return;
-            }
-
-            try {
-                if (privyClient) {
-                    await privyClient.loginWithEmail({
-                        email: window.state.userEmail
-                    });
-                    showToast('Verification code resent!', 'success');
-                }
-            } catch (error) {
-                console.error('Resend error:', error);
-                showToast('Error resending code', 'warning');
+                showToast('Login error: ' + error.message, 'warning');
             }
         };
 
@@ -874,6 +732,8 @@
             window.state.privyUser = privyUser;
             
             let identifier = null;
+            
+            // Extract user information from Privy response
             if (privyUser.wallet) {
                 identifier = privyUser.wallet.address;
                 window.state.walletAddress = identifier;
@@ -886,6 +746,10 @@
                 const wallet = privyUser.linkedAccounts.find(a => a.type === 'wallet');
                 if (wallet && !window.state.walletAddress) {
                     window.state.walletAddress = wallet.address;
+                }
+                const email = privyUser.linkedAccounts.find(a => a.type === 'email');
+                if (email && !window.state.userEmail) {
+                    window.state.userEmail = email.address;
                 }
             }
 
@@ -994,8 +858,6 @@
 
                 closePaymentModal();
                 showToast('Payment confirmation received! We will verify and activate your account within 24 hours.', 'success');
-
-                // TODO: Implement real payment verification webhook
                 
             } catch (error) {
                 console.error('Payment confirmation error:', error);
@@ -1004,26 +866,6 @@
         };
 
         // ==================== HELPER FUNCTIONS ====================
-        function isValidEmail(email) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        }
-
-        function showEmailVerifyModal(email) {
-            const message = window.state.lang === 'en' 
-                ? `We sent a verification code to ${email}`
-                : `我們已向 ${email} 發送驗證碼`;
-            document.getElementById('sent-to-email').textContent = message;
-            document.getElementById('email-verify-modal').classList.remove('hidden');
-            document.getElementById('email-verify-modal').classList.add('flex');
-            document.getElementById('verify-code').value = '';
-            document.getElementById('verify-code').focus();
-        }
-
-        window.closeEmailVerify = function() {
-            document.getElementById('email-verify-modal').classList.add('hidden');
-            document.getElementById('email-verify-modal').classList.remove('flex');
-        };
-
         function updateStep(index) {
             const steps = ['step-1', 'step-2', 'step-3'];
             const el = document.getElementById(steps[index]);
@@ -1264,8 +1106,6 @@
             `;
         }
 
-        // [Continue in next part due to length...]
-        
         function renderCaptainView(container) {
             container.innerHTML = `
                 <div class="max-w-7xl mx-auto">
@@ -1582,8 +1422,8 @@
                 : '確定要登出嗎?';
             
             if (confirm(confirmMsg)) {
-                if (privyClient && privyClient.logout) {
-                    privyClient.logout();
+                if (privyAuth && privyAuth.logout) {
+                    privyAuth.logout();
                 }
                 
                 window.state = {
@@ -1606,23 +1446,11 @@
 
         // ==================== INITIALIZATION ====================
         updateLanguage();
-        
-        document.getElementById('email-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') loginWithEmail();
-        });
-        
-        document.getElementById('verify-code').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') verifyEmailCode();
-        });
-        
-        document.getElementById('verify-code').addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/[^0-9]/g, '');
-        });
 
         console.log('🚀 AIFID System Initialized');
         console.log('📧 Privy App ID:', CONFIG.privyAppId);
         console.log('💾 Supabase Connected:', !!supabase);
-        console.log('🔐 Privy Client:', !!privyClient);
+        console.log('🔐 Privy Auth:', !!privyAuth);
     </script>
 </body>
 </html>
