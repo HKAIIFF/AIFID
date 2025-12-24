@@ -8,6 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- Privy SDK -->
+    <script src="https://unpkg.com/@privy-io/js-sdk-core@latest/dist/index.js"></script>
+    
     <style>
         * { 
             font-family: 'Inter', sans-serif;
@@ -121,25 +125,6 @@
             border-color: #ddd;
         }
 
-        .matrix-connector {
-            height: 2px;
-            background: linear-gradient(90deg, #e5e5e5 0%, #e5e5e5 100%);
-            position: relative;
-        }
-
-        .matrix-connector::after {
-            content: '';
-            position: absolute;
-            right: -6px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 0;
-            height: 0;
-            border-left: 6px solid #e5e5e5;
-            border-top: 4px solid transparent;
-            border-bottom: 4px solid transparent;
-        }
-
         @keyframes marquee {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
@@ -235,34 +220,17 @@
 
                 <!-- Wallet Options -->
                 <div class="space-y-3">
-                    <button onclick="loginWithPhantom()" class="w-full p-5 border-2 border-gray-200 rounded-2xl hover:border-purple-500 hover:bg-purple-50 transition-all flex items-center justify-between group">
+                    <button onclick="loginWithWallet()" class="w-full p-5 border-2 border-gray-200 rounded-2xl hover:border-purple-500 hover:bg-purple-50 transition-all flex items-center justify-between group">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-all">
-                                <i class="fas fa-ghost text-purple-600 text-xl"></i>
+                                <i class="fas fa-wallet text-purple-600 text-xl"></i>
                             </div>
-                            <span class="font-bold text-gray-800">Phantom</span>
+                            <span class="font-bold text-gray-800">
+                                <span class="lang-en">Connect Wallet</span>
+                                <span class="lang-zh hidden">連接錢包</span>
+                            </span>
                         </div>
                         <i class="fas fa-arrow-right text-gray-400 group-hover:text-purple-600 transition-all"></i>
-                    </button>
-
-                    <button onclick="loginWithMetaMask()" class="w-full p-5 border-2 border-gray-200 rounded-2xl hover:border-orange-500 hover:bg-orange-50 transition-all flex items-center justify-between group">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center group-hover:bg-orange-200 transition-all">
-                                <i class="fas fa-fox text-orange-600 text-xl"></i>
-                            </div>
-                            <span class="font-bold text-gray-800">MetaMask</span>
-                        </div>
-                        <i class="fas fa-arrow-right text-gray-400 group-hover:text-orange-600 transition-all"></i>
-                    </button>
-
-                    <button onclick="loginWithBinance()" class="w-full p-5 border-2 border-gray-200 rounded-2xl hover:border-yellow-500 hover:bg-yellow-50 transition-all flex items-center justify-between group">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center group-hover:bg-yellow-200 transition-all">
-                                <i class="fas fa-wallet text-yellow-600 text-xl"></i>
-                            </div>
-                            <span class="font-bold text-gray-800">Binance Web3</span>
-                        </div>
-                        <i class="fas fa-arrow-right text-gray-400 group-hover:text-yellow-600 transition-all"></i>
                     </button>
                 </div>
 
@@ -366,6 +334,189 @@
             </div>
             
             <p id="connecting-method" class="text-sm text-white/60 font-mono"></p>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-6">
+        <div class="bg-white rounded-3xl max-w-3xl w-full p-8 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closePaymentModal()" class="absolute top-6 right-6 w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-shopping-cart text-white text-3xl"></i>
+                </div>
+                <h2 class="text-3xl font-black mb-2">
+                    <span class="lang-en">Complete Purchase</span>
+                    <span class="lang-zh hidden">完成購買</span>
+                </h2>
+                <p class="text-gray-600">
+                    <span class="lang-en">AIFID Genesis Package - $600.00</span>
+                    <span class="lang-zh hidden">AIFID創世套餐 - $600.00</span>
+                </p>
+            </div>
+
+            <div class="bg-gray-50 rounded-2xl p-6 mb-6">
+                <div class="flex justify-between mb-3">
+                    <span>
+                        <span class="lang-en">Package</span>
+                        <span class="lang-zh hidden">套餐</span>
+                    </span>
+                    <span class="font-bold">$600.00</span>
+                </div>
+                <div class="flex justify-between mb-3">
+                    <span>
+                        <span class="lang-en">Network Fee</span>
+                        <span class="lang-zh hidden">網絡費用</span>
+                    </span>
+                    <span class="font-bold">$3.00</span>
+                </div>
+                <div class="border-t-2 border-gray-300 my-3"></div>
+                <div class="flex justify-between text-xl font-black">
+                    <span>
+                        <span class="lang-en">Total</span>
+                        <span class="lang-zh hidden">總計</span>
+                    </span>
+                    <span>$603.00</span>
+                </div>
+            </div>
+
+            <!-- CRYPTO PAYMENT -->
+            <div class="mb-6">
+                <h3 class="text-xl font-black mb-4">
+                    <span class="lang-en">Crypto Payment</span>
+                    <span class="lang-zh hidden">加密貨幣支付</span>
+                </h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="selectCrypto('USDT-SOL')" class="crypto-option p-4 border-2 border-gray-200 rounded-xl hover:border-green-500 transition-all">
+                        <div class="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                        </div>
+                        <div class="font-bold">USDT</div>
+                        <div class="text-xs text-gray-500">Solana</div>
+                    </button>
+                    <button onclick="selectCrypto('USDC-SOL')" class="crypto-option p-4 border-2 border-gray-200 rounded-xl hover:border-blue-500 transition-all">
+                        <div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-circle text-blue-600 text-xl"></i>
+                        </div>
+                        <div class="font-bold">USDC</div>
+                        <div class="text-xs text-gray-500">Solana</div>
+                    </button>
+                    <button onclick="selectCrypto('USDT-BSC')" class="crypto-option p-4 border-2 border-gray-200 rounded-xl hover:border-yellow-500 transition-all">
+                        <div class="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-dollar-sign text-yellow-600 text-xl"></i>
+                        </div>
+                        <div class="font-bold">USDT</div>
+                        <div class="text-xs text-gray-500">BSC (BEP20)</div>
+                    </button>
+                    <button onclick="selectCrypto('USDC-BSC')" class="crypto-option p-4 border-2 border-gray-200 rounded-xl hover:border-yellow-500 transition-all">
+                        <div class="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-circle text-yellow-600 text-xl"></i>
+                        </div>
+                        <div class="font-bold">USDC</div>
+                        <div class="text-xs text-gray-500">BSC (BEP20)</div>
+                    </button>
+                </div>
+            </div>
+
+            <div id="crypto-details" class="hidden mb-6">
+                <div class="mb-4">
+                    <label class="text-sm font-bold mb-2 block">
+                        <span class="lang-en">Receiving Address</span>
+                        <span class="lang-zh hidden">接收地址</span>
+                    </label>
+                    <div class="flex gap-2">
+                        <input type="text" id="crypto-address" readonly class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl font-mono text-sm bg-gray-50">
+                        <button onclick="copyCryptoAddress()" class="px-6 bg-gray-200 hover:bg-gray-300 rounded-xl font-bold">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-center mb-6">
+                    <div id="qr-code-container" class="w-48 h-48 bg-gray-200 rounded-xl mx-auto flex items-center justify-center mb-2">
+                        <i class="fas fa-qrcode text-6xl text-gray-400"></i>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        <span class="lang-en">Scan QR to pay</span>
+                        <span class="lang-zh hidden">掃描二維碼支付</span>
+                    </div>
+                </div>
+
+                <button onclick="confirmPayment()" class="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-black text-lg">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span class="lang-en">I've Paid</span>
+                    <span class="lang-zh hidden">我已支付</span>
+                </button>
+            </div>
+
+            <!-- FIAT PAYMENT (Stripe) -->
+            <div>
+                <h3 class="text-xl font-black mb-4">
+                    <span class="lang-en">Fiat Payment (Stripe)</span>
+                    <span class="lang-zh hidden">法幣支付 (Stripe)</span>
+                </h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="https://buy.stripe.com/7sYeVd5sc9RxaqvgBD0x200" target="_blank" class="p-4 border-2 border-gray-200 rounded-xl hover:border-black transition-all text-center">
+                        <div class="font-bold">HKD 4,840</div>
+                        <div class="text-xs text-gray-500">
+                            <span class="lang-en">Hong Kong Dollar</span>
+                            <span class="lang-zh hidden">港幣</span>
+                        </div>
+                    </a>
+                    <a href="https://buy.stripe.com/14AeVd9Is9Rx9mr7130x202" target="_blank" class="p-4 border-2 border-gray-200 rounded-xl hover:border-black transition-all text-center">
+                        <div class="font-bold">USD 622</div>
+                        <div class="text-xs text-gray-500">
+                            <span class="lang-en">US Dollar</span>
+                            <span class="lang-zh hidden">美元</span>
+                        </div>
+                    </a>
+                    <a href="https://buy.stripe.com/8x24gz1bW7Jp6af2KN0x203" target="_blank" class="p-4 border-2 border-gray-200 rounded-xl hover:border-black transition-all text-center">
+                        <div class="font-bold">JPY 96,800</div>
+                        <div class="text-xs text-gray-500">
+                            <span class="lang-en">Japanese Yen</span>
+                            <span class="lang-zh hidden">日元</span>
+                        </div>
+                    </a>
+                    <a href="https://buy.stripe.com/9B600jcUE0gX2Y3adf0x204" target="_blank" class="p-4 border-2 border-gray-200 rounded-xl hover:border-black transition-all text-center">
+                        <div class="font-bold">SGD 804</div>
+                        <div class="text-xs text-gray-500">
+                            <span class="lang-en">Singapore Dollar</span>
+                            <span class="lang-zh hidden">新加坡元</span>
+                        </div>
+                    </a>
+                    <a href="https://buy.stripe.com/3cI7sL6wg5Bh2Y3bhj0x205" target="_blank" class="p-4 border-2 border-gray-200 rounded-xl hover:border-black transition-all text-center">
+                        <div class="font-bold">GBP 467</div>
+                        <div class="text-xs text-gray-500">
+                            <span class="lang-en">British Pound</span>
+                            <span class="lang-zh hidden">英鎊</span>
+                        </div>
+                    </a>
+                    <a href="https://buy.stripe.com/00w5kDcUE5BheGL5WZ0x206" target="_blank" class="p-4 border-2 border-gray-200 rounded-xl hover:border-black transition-all text-center">
+                        <div class="font-bold">EUR 532</div>
+                        <div class="text-xs text-gray-500">
+                            <span class="lang-en">Euro</span>
+                            <span class="lang-zh hidden">歐元</span>
+                        </div>
+                    </a>
+                    <a href="https://buy.stripe.com/dRmdR9f2MfbR0PVdpr0x207" target="_blank" class="p-4 border-2 border-gray-200 rounded-xl hover:border-black transition-all text-center">
+                        <div class="font-bold">AED 2,285</div>
+                        <div class="text-xs text-gray-500">
+                            <span class="lang-en">UAE Dirham</span>
+                            <span class="lang-zh hidden">阿聯酋迪拉姆</span>
+                        </div>
+                    </a>
+                    <a href="https://buy.stripe.com/aFa8wPg6Q2p5eGL8570x208" target="_blank" class="p-4 border-2 border-gray-200 rounded-xl hover:border-black transition-all text-center">
+                        <div class="font-bold">THB 19,602</div>
+                        <div class="text-xs text-gray-500">
+                            <span class="lang-en">Thai Baht</span>
+                            <span class="lang-zh hidden">泰銖</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -501,7 +652,7 @@
         <span id="toast-message" class="font-medium"></span>
     </div>
 
-    <!-- Main JavaScript with Privy Integration -->
+    <!-- Main JavaScript with Real Privy Integration -->
     <script type="module">
         // ==================== CONFIGURATION ====================
         const CONFIG = {
@@ -510,8 +661,16 @@
             privyAppId: 'cmjczh8jj02b3la0c812w2xpm'
         };
 
+        // Real wallet addresses for crypto payments
+        const WALLET_ADDRESSES = {
+            'USDT-SOL': '3QBgQiHC743ER9beX74bp8K7xrURQR2t5myfcG6tSTLv',
+            'USDC-SOL': '3QBgQiHC743ER9beX74bp8K7xrURQR2t5myfcG6tSTLv',
+            'USDT-BSC': '0xc059dc798ec9f31e765d9cccffd2c62b993857c9',
+            'USDC-BSC': '0xc059dc798ec9f31e765d9cccffd2c62b993857c9'
+        };
+
         // ==================== IMPORT DEPENDENCIES ====================
-        let supabase, privy;
+        let supabase, privyClient;
 
         try {
             const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
@@ -521,11 +680,26 @@
             console.error('❌ Supabase import failed:', error);
         }
 
+        // Initialize Privy Client
         try {
-            const PrivyModule = await import('https://esm.sh/@privy-io/react-auth@latest');
-            console.log('✅ Privy module loaded');
+            if (window.Privy) {
+                privyClient = window.Privy.createClient({
+                    appId: CONFIG.privyAppId
+                });
+                console.log('✅ Privy initialized with App ID:', CONFIG.privyAppId);
+            } else {
+                console.warn('⚠️ Privy SDK not loaded yet, will retry...');
+                setTimeout(() => {
+                    if (window.Privy) {
+                        privyClient = window.Privy.createClient({
+                            appId: CONFIG.privyAppId
+                        });
+                        console.log('✅ Privy initialized (delayed)');
+                    }
+                }, 1000);
+            }
         } catch (error) {
-            console.error('⚠️ Privy import failed, using fallback auth:', error);
+            console.error('❌ Privy initialization failed:', error);
         }
 
         // ==================== GLOBAL STATE ====================
@@ -544,10 +718,9 @@
             currentReferralSlot: null,
             balance: {
                 usdt: 0,
-                usdc: 0,
-                sol: 0,
-                bnb: 0
-            }
+                usdc: 0
+            },
+            selectedCrypto: null
         };
 
         // ==================== CAPTAIN PLAN STATE ====================
@@ -555,12 +728,7 @@
             packagePrice: 600,
             a1DirectRate: 0.20,
             a2DirectRate: 0.80,
-            teamRoyaltyRate: 0.10,
-            matrixStructure: {
-                level1: 1,
-                level2: 2,
-                level3: 4
-            }
+            teamRoyaltyRate: 0.10
         };
 
         const captainState = {
@@ -578,8 +746,9 @@
             }
         };
 
-        // ==================== PRIVY LOGIN FUNCTIONS ====================
+        // ==================== REAL PRIVY LOGIN FUNCTIONS ====================
         
+        // Email Login with REAL Privy
         window.loginWithEmail = async function() {
             const email = document.getElementById('email-input').value.trim();
             if (!isValidEmail(email)) {
@@ -593,20 +762,27 @@
                 document.getElementById('connecting-overlay').classList.remove('hidden');
                 document.getElementById('connecting-overlay').classList.add('flex');
 
-                // Simulate sending verification code (Replace with actual Privy call in production)
-                setTimeout(() => {
+                // REAL Privy email login
+                if (privyClient) {
+                    await privyClient.loginWithEmail({
+                        email: email
+                    });
+                    
                     document.getElementById('connecting-overlay').classList.add('hidden');
                     showEmailVerifyModal(email);
-                    showToast('Verification code sent!', 'success');
-                }, 2000);
+                    showToast('Verification code sent to your email!', 'success');
+                } else {
+                    throw new Error('Privy client not initialized');
+                }
                 
             } catch (error) {
                 console.error('Email login error:', error);
                 document.getElementById('connecting-overlay').classList.add('hidden');
-                showToast('Error sending code: ' + error.message, 'warning');
+                showToast('Error: ' + error.message, 'warning');
             }
         };
 
+        // Verify Email Code with REAL Privy
         window.verifyEmailCode = async function() {
             const code = document.getElementById('verify-code').value.trim();
             const email = window.state.userEmail;
@@ -622,117 +798,74 @@
                 document.getElementById('connecting-overlay').classList.remove('hidden');
                 document.getElementById('connecting-overlay').classList.add('flex');
 
-                // Simulate verification (Replace with actual Privy call in production)
-                setTimeout(() => updateStep(0), 800);
-                setTimeout(() => updateStep(1), 1600);
-                setTimeout(() => {
+                // REAL Privy verification
+                if (privyClient) {
+                    updateStep(0);
+                    const user = await privyClient.verifyOTP({
+                        email: email,
+                        code: code
+                    });
+                    
+                    updateStep(1);
                     updateStep(2);
-                    setTimeout(() => {
-                        handleLoginSuccess({ email: { address: email } });
-                    }, 800);
-                }, 2400);
+                    
+                    await handleLoginSuccess(user);
+                } else {
+                    throw new Error('Privy client not initialized');
+                }
 
             } catch (error) {
                 console.error('Verification error:', error);
                 document.getElementById('connecting-overlay').classList.add('hidden');
                 document.getElementById('email-verify-modal').classList.remove('hidden');
-                showToast('Invalid code', 'warning');
+                document.getElementById('email-verify-modal').classList.add('flex');
+                showToast('Invalid code: ' + error.message, 'warning');
             }
         };
 
-        window.loginWithPhantom = async function() {
+        // Wallet Login with REAL Privy
+        window.loginWithWallet = async function() {
             try {
-                document.getElementById('connecting-method').textContent = 'Phantom Wallet';
+                document.getElementById('connecting-method').textContent = 'Connecting Wallet...';
                 document.getElementById('connecting-overlay').classList.remove('hidden');
                 document.getElementById('connecting-overlay').classList.add('flex');
 
-                if (window.solana && window.solana.isPhantom) {
-                    setTimeout(async () => {
-                        updateStep(0);
-                        const resp = await window.solana.connect();
-                        const walletAddress = resp.publicKey.toString();
-                        
-                        setTimeout(() => updateStep(1), 800);
-                        setTimeout(() => {
-                            updateStep(2);
-                            setTimeout(() => {
-                                handleLoginSuccess({ wallet: { address: walletAddress } });
-                            }, 800);
-                        }, 1600);
-                    }, 1000);
+                // REAL Privy wallet login
+                if (privyClient) {
+                    updateStep(0);
+                    const user = await privyClient.loginWithWallet();
+                    
+                    updateStep(1);
+                    updateStep(2);
+                    
+                    await handleLoginSuccess(user);
                 } else {
-                    document.getElementById('connecting-overlay').classList.add('hidden');
-                    showToast('Phantom wallet not found. Please install it first.', 'warning');
-                    setTimeout(() => window.open('https://phantom.app/', '_blank'), 2000);
+                    throw new Error('Privy client not initialized');
                 }
+
             } catch (error) {
-                console.error('Phantom connection error:', error);
+                console.error('Wallet connection error:', error);
                 document.getElementById('connecting-overlay').classList.add('hidden');
-                showToast('Connection cancelled or failed', 'warning');
+                showToast('Connection cancelled or failed: ' + error.message, 'warning');
             }
         };
 
-        window.loginWithMetaMask = async function() {
-            try {
-                document.getElementById('connecting-method').textContent = 'MetaMask';
-                document.getElementById('connecting-overlay').classList.remove('hidden');
-                document.getElementById('connecting-overlay').classList.add('flex');
-
-                if (window.ethereum) {
-                    setTimeout(async () => {
-                        updateStep(0);
-                        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                        const walletAddress = accounts[0];
-                        
-                        setTimeout(() => updateStep(1), 800);
-                        setTimeout(() => {
-                            updateStep(2);
-                            setTimeout(() => {
-                                handleLoginSuccess({ wallet: { address: walletAddress } });
-                            }, 800);
-                        }, 1600);
-                    }, 1000);
-                } else {
-                    document.getElementById('connecting-overlay').classList.add('hidden');
-                    showToast('MetaMask not found. Please install it first.', 'warning');
-                    setTimeout(() => window.open('https://metamask.io/', '_blank'), 2000);
-                }
-            } catch (error) {
-                console.error('MetaMask connection error:', error);
-                document.getElementById('connecting-overlay').classList.add('hidden');
-                showToast('Connection cancelled or failed', 'warning');
+        window.resendCode = async function() {
+            if (!window.state.userEmail) {
+                showToast('No email found', 'warning');
+                return;
             }
-        };
 
-        window.loginWithBinance = async function() {
             try {
-                document.getElementById('connecting-method').textContent = 'Binance Web3 Wallet';
-                document.getElementById('connecting-overlay').classList.remove('hidden');
-                document.getElementById('connecting-overlay').classList.add('flex');
-
-                if (window.BinanceChain) {
-                    setTimeout(async () => {
-                        updateStep(0);
-                        const accounts = await window.BinanceChain.request({ method: 'eth_requestAccounts' });
-                        const walletAddress = accounts[0];
-                        
-                        setTimeout(() => updateStep(1), 800);
-                        setTimeout(() => {
-                            updateStep(2);
-                            setTimeout(() => {
-                                handleLoginSuccess({ wallet: { address: walletAddress } });
-                            }, 800);
-                        }, 1600);
-                    }, 1000);
-                } else {
-                    document.getElementById('connecting-overlay').classList.add('hidden');
-                    showToast('Binance Web3 Wallet not found. Please install it first.', 'warning');
-                    setTimeout(() => window.open('https://www.binance.com/en/web3wallet', '_blank'), 2000);
+                if (privyClient) {
+                    await privyClient.loginWithEmail({
+                        email: window.state.userEmail
+                    });
+                    showToast('Verification code resent!', 'success');
                 }
             } catch (error) {
-                console.error('Binance connection error:', error);
-                document.getElementById('connecting-overlay').classList.add('hidden');
-                showToast('Connection cancelled or failed', 'warning');
+                console.error('Resend error:', error);
+                showToast('Error resending code', 'warning');
             }
         };
 
@@ -744,9 +877,16 @@
             if (privyUser.wallet) {
                 identifier = privyUser.wallet.address;
                 window.state.walletAddress = identifier;
-            } else if (privyUser.email) {
+            }
+            if (privyUser.email) {
                 identifier = privyUser.email.address;
                 window.state.userEmail = identifier;
+            }
+            if (privyUser.linkedAccounts) {
+                const wallet = privyUser.linkedAccounts.find(a => a.type === 'wallet');
+                if (wallet && !window.state.walletAddress) {
+                    window.state.walletAddress = wallet.address;
+                }
             }
 
             // Sync with Supabase
@@ -761,7 +901,7 @@
                     .from('users')
                     .select('*')
                     .eq(searchKey, searchValue)
-                    .single();
+                    .maybeSingle();
 
                 if (!existingUser) {
                     const newUser = {
@@ -770,7 +910,8 @@
                         referrer_id: referrer || null,
                         role: 'member',
                         balance_usdt: 0,
-                        balance_usdc: 0
+                        balance_usdc: 0,
+                        created_at: new Date().toISOString()
                     };
                     
                     await supabase.from('users').insert([newUser]);
@@ -795,13 +936,83 @@
             }, 800);
         }
 
+        // ==================== PAYMENT FUNCTIONS ====================
+        window.openPaymentModal = function() {
+            document.getElementById('payment-modal').classList.remove('hidden');
+            document.getElementById('payment-modal').classList.add('flex');
+            updateLanguage();
+        };
+
+        window.closePaymentModal = function() {
+            document.getElementById('payment-modal').classList.add('hidden');
+            document.getElementById('payment-modal').classList.remove('flex');
+            document.getElementById('crypto-details').classList.add('hidden');
+            window.state.selectedCrypto = null;
+        };
+
+        window.selectCrypto = function(currency) {
+            window.state.selectedCrypto = currency;
+            const address = WALLET_ADDRESSES[currency];
+            
+            document.querySelectorAll('.crypto-option').forEach(btn => {
+                btn.classList.remove('border-black', 'bg-gray-50');
+                btn.classList.add('border-gray-200');
+            });
+            event.currentTarget.classList.add('border-black', 'bg-gray-50');
+            event.currentTarget.classList.remove('border-gray-200');
+            
+            document.getElementById('crypto-address').value = address;
+            document.getElementById('crypto-details').classList.remove('hidden');
+            
+            showToast(`Selected ${currency}`, 'success');
+        };
+
+        window.copyCryptoAddress = function() {
+            const address = document.getElementById('crypto-address').value;
+            navigator.clipboard.writeText(address);
+            showToast('Address copied to clipboard!', 'success');
+        };
+
+        window.confirmPayment = async function() {
+            if (!window.state.selectedCrypto) {
+                showToast('Please select a payment method', 'warning');
+                return;
+            }
+
+            try {
+                // Record payment attempt in Supabase
+                const paymentRecord = {
+                    user_email: window.state.userEmail,
+                    user_wallet: window.state.walletAddress,
+                    payment_method: window.state.selectedCrypto,
+                    amount: 603,
+                    status: 'pending',
+                    created_at: new Date().toISOString()
+                };
+
+                await supabase.from('payments').insert([paymentRecord]);
+
+                closePaymentModal();
+                showToast('Payment confirmation received! We will verify and activate your account within 24 hours.', 'success');
+
+                // TODO: Implement real payment verification webhook
+                
+            } catch (error) {
+                console.error('Payment confirmation error:', error);
+                showToast('Error recording payment. Please contact support.', 'warning');
+            }
+        };
+
         // ==================== HELPER FUNCTIONS ====================
         function isValidEmail(email) {
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
         function showEmailVerifyModal(email) {
-            document.getElementById('sent-to-email').textContent = `We sent a verification code to ${email}`;
+            const message = window.state.lang === 'en' 
+                ? `We sent a verification code to ${email}`
+                : `我們已向 ${email} 發送驗證碼`;
+            document.getElementById('sent-to-email').textContent = message;
             document.getElementById('email-verify-modal').classList.remove('hidden');
             document.getElementById('email-verify-modal').classList.add('flex');
             document.getElementById('verify-code').value = '';
@@ -811,10 +1022,6 @@
         window.closeEmailVerify = function() {
             document.getElementById('email-verify-modal').classList.add('hidden');
             document.getElementById('email-verify-modal').classList.remove('flex');
-        };
-
-        window.resendCode = function() {
-            showToast('Verification code resent!', 'success');
         };
 
         function updateStep(index) {
@@ -890,204 +1097,176 @@
             const container = document.getElementById('content-container');
             
             if (view === 'purchase') {
-                container.innerHTML = `
-                    <div class="max-w-7xl mx-auto">
-                        <div class="mb-12">
-                            <h1 class="text-5xl font-black mb-4">
-                                <span class="lang-en">Purchase AIFID Package</span>
-                                <span class="lang-zh hidden">購買AIFID套餐</span>
-                            </h1>
-                            <p class="text-gray-600 text-lg">
-                                <span class="lang-en">Join the AI Film Industry Development ecosystem and unlock all premium features.</span>
-                                <span class="lang-zh hidden">加入AI電影產業發展生態系統並解鎖所有高級功能。</span>
-                            </p>
-                        </div>
-
-                        <!-- Package Card -->
-                        <div class="bg-white rounded-3xl shadow-xl p-10 border-2 border-black">
-                            <div class="flex items-start justify-between mb-8">
-                                <div>
-                                    <h2 class="text-3xl font-black mb-2">
-                                        <span class="lang-en">AIFID Premium Package</span>
-                                        <span class="lang-zh hidden">AIFID 高級套餐</span>
-                                    </h2>
-                                    <p class="text-gray-600">
-                                        <span class="lang-en">Lifetime Access • All Modules • Captain Plan Eligible</span>
-                                        <span class="lang-zh hidden">終身使用 • 所有模組 • 可參與船長計劃</span>
-                                    </p>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-5xl font-black">$600</div>
-                                    <div class="text-sm text-gray-500">
-                                        <span class="lang-en">One-time payment</span>
-                                        <span class="lang-zh hidden">一次性付款</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Features -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                                <div class="flex items-start gap-4">
-                                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                        <i class="fas fa-check text-green-600 text-xl"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold mb-1">
-                                            <span class="lang-en">HK AI Film Academy Access</span>
-                                            <span class="lang-zh hidden">香港AI電影學院權限</span>
-                                        </h3>
-                                        <p class="text-sm text-gray-600">
-                                            <span class="lang-en">Professional courses and certification programs</span>
-                                            <span class="lang-zh hidden">專業課程和認證計劃</span>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-start gap-4">
-                                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                        <i class="fas fa-check text-green-600 text-xl"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold mb-1">
-                                            <span class="lang-en">HK AI Film Market</span>
-                                            <span class="lang-zh hidden">香港AI電影市場</span>
-                                        </h3>
-                                        <p class="text-sm text-gray-600">
-                                            <span class="lang-en">Distribution and monetization platform</span>
-                                            <span class="lang-zh hidden">發行和變現平台</span>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-start gap-4">
-                                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                        <i class="fas fa-check text-green-600 text-xl"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold mb-1">
-                                            <span class="lang-en">Festival Submission Rights</span>
-                                            <span class="lang-zh hidden">電影節提交權</span>
-                                        </h3>
-                                        <p class="text-sm text-gray-600">
-                                            <span class="lang-en">Priority submission to HK AI Film Festival</span>
-                                            <span class="lang-zh hidden">優先提交至香港AI電影節</span>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-start gap-4">
-                                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                        <i class="fas fa-check text-green-600 text-xl"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold mb-1">
-                                            <span class="lang-en">Captain Plan Eligibility</span>
-                                            <span class="lang-zh hidden">船長計劃資格</span>
-                                        </h3>
-                                        <p class="text-sm text-gray-600">
-                                            <span class="lang-en">Earn revenue by building your team (2x2x2 matrix)</span>
-                                            <span class="lang-zh hidden">通過建立團隊賺取收入 (2x2x2 矩陣)</span>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Payment Methods -->
-                            <div class="mb-8">
-                                <h3 class="font-bold mb-4">
-                                    <span class="lang-en">Select Payment Method</span>
-                                    <span class="lang-zh hidden">選擇付款方式</span>
-                                </h3>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <button onclick="selectPayment('usdt')" class="payment-option p-6 border-2 border-gray-200 rounded-2xl hover:border-black transition-all">
-                                        <div class="text-center">
-                                            <div class="text-3xl mb-2">💵</div>
-                                            <div class="font-bold">USDT</div>
-                                            <div class="text-xs text-gray-500">Tether USD</div>
-                                        </div>
-                                    </button>
-                                    <button onclick="selectPayment('usdc')" class="payment-option p-6 border-2 border-gray-200 rounded-2xl hover:border-black transition-all">
-                                        <div class="text-center">
-                                            <div class="text-3xl mb-2">💰</div>
-                                            <div class="font-bold">USDC</div>
-                                            <div class="text-xs text-gray-500">USD Coin</div>
-                                        </div>
-                                    </button>
-                                    <button onclick="selectPayment('stripe')" class="payment-option p-6 border-2 border-gray-200 rounded-2xl hover:border-black transition-all">
-                                        <div class="text-center">
-                                            <div class="text-3xl mb-2">💳</div>
-                                            <div class="font-bold">Credit Card</div>
-                                            <div class="text-xs text-gray-500">via Stripe</div>
-                                        </div>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <button onclick="processPurchase()" class="w-full py-6 bg-black text-white rounded-2xl font-black text-xl hover:bg-gray-900 transition-all">
-                                <span class="lang-en">Complete Purchase - $600</span>
-                                <span class="lang-zh hidden">完成購買 - $600</span>
-                            </button>
-                        </div>
-
-                        <!-- Trust Signals -->
-                        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="text-center p-6 bg-white rounded-2xl border border-gray-200">
-                                <i class="fas fa-shield-alt text-4xl mb-4 text-green-600"></i>
-                                <h3 class="font-bold mb-2">
-                                    <span class="lang-en">Secure Payment</span>
-                                    <span class="lang-zh hidden">安全付款</span>
-                                </h3>
-                                <p class="text-sm text-gray-600">
-                                    <span class="lang-en">256-bit SSL encryption</span>
-                                    <span class="lang-zh hidden">256位SSL加密</span>
-                                </p>
-                            </div>
-                            <div class="text-center p-6 bg-white rounded-2xl border border-gray-200">
-                                <i class="fas fa-clock text-4xl mb-4 text-blue-600"></i>
-                                <h3 class="font-bold mb-2">
-                                    <span class="lang-en">Instant Access</span>
-                                    <span class="lang-zh hidden">即時訪問</span>
-                                </h3>
-                                <p class="text-sm text-gray-600">
-                                    <span class="lang-en">Activate immediately after payment</span>
-                                    <span class="lang-zh hidden">付款後立即激活</span>
-                                </p>
-                            </div>
-                            <div class="text-center p-6 bg-white rounded-2xl border border-gray-200">
-                                <i class="fas fa-headset text-4xl mb-4 text-purple-600"></i>
-                                <h3 class="font-bold mb-2">
-                                    <span class="lang-en">24/7 Support</span>
-                                    <span class="lang-zh hidden">24/7 支持</span>
-                                </h3>
-                                <p class="text-sm text-gray-600">
-                                    <span class="lang-en">Dedicated support team</span>
-                                    <span class="lang-zh hidden">專屬支持團隊</span>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                renderPurchaseView(container);
             }
             else if (view === 'captain') {
-                renderCaptainView();
+                renderCaptainView(container);
             }
             else if (view === 'wallet') {
-                renderWalletView();
+                renderWalletView(container);
             }
             else if (view === 'profile') {
-                renderProfileView();
+                renderProfileView(container);
             }
             else if (view === 'hkaifa' || view === 'hkaifm' || view === 'hkaiiff' || view === 'service') {
-                renderModuleView(view);
+                renderModuleView(container, view);
             }
             
             updateLanguage();
         }
 
-        // ==================== CAPTAIN PLAN VIEW ====================
-        function renderCaptainView() {
-            const container = document.getElementById('content-container');
-            
+        function renderPurchaseView(container) {
+            container.innerHTML = `
+                <div class="max-w-7xl mx-auto">
+                    <div class="mb-12">
+                        <h1 class="text-5xl font-black mb-4">
+                            <span class="lang-en">Purchase AIFID Package</span>
+                            <span class="lang-zh hidden">購買AIFID套餐</span>
+                        </h1>
+                        <p class="text-gray-600 text-lg">
+                            <span class="lang-en">Join the AI Film Industry Development ecosystem and unlock all premium features.</span>
+                            <span class="lang-zh hidden">加入AI電影產業發展生態系統並解鎖所有高級功能。</span>
+                        </p>
+                    </div>
+
+                    <!-- Package Card -->
+                    <div class="bg-white rounded-3xl shadow-xl p-10 border-2 border-black">
+                        <div class="flex items-start justify-between mb-8">
+                            <div>
+                                <h2 class="text-3xl font-black mb-2">
+                                    <span class="lang-en">AIFID Premium Package</span>
+                                    <span class="lang-zh hidden">AIFID 高級套餐</span>
+                                </h2>
+                                <p class="text-gray-600">
+                                    <span class="lang-en">Lifetime Access • All Modules • Captain Plan Eligible</span>
+                                    <span class="lang-zh hidden">終身使用 • 所有模組 • 可參與船長計劃</span>
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-5xl font-black">$600</div>
+                                <div class="text-sm text-gray-500">
+                                    <span class="lang-en">One-time payment</span>
+                                    <span class="lang-zh hidden">一次性付款</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Features -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-check text-green-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold mb-1">
+                                        <span class="lang-en">HK AI Film Academy Access</span>
+                                        <span class="lang-zh hidden">香港AI電影學院權限</span>
+                                    </h3>
+                                    <p class="text-sm text-gray-600">
+                                        <span class="lang-en">Professional courses and certification programs</span>
+                                        <span class="lang-zh hidden">專業課程和認證計劃</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-check text-green-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold mb-1">
+                                        <span class="lang-en">HK AI Film Market</span>
+                                        <span class="lang-zh hidden">香港AI電影市場</span>
+                                    </h3>
+                                    <p class="text-sm text-gray-600">
+                                        <span class="lang-en">Distribution and monetization platform</span>
+                                        <span class="lang-zh hidden">發行和變現平台</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-check text-green-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold mb-1">
+                                        <span class="lang-en">Festival Submission Rights</span>
+                                        <span class="lang-zh hidden">電影節提交權</span>
+                                    </h3>
+                                    <p class="text-sm text-gray-600">
+                                        <span class="lang-en">Priority submission to HK AI Film Festival</span>
+                                        <span class="lang-zh hidden">優先提交至香港AI電影節</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-check text-green-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold mb-1">
+                                        <span class="lang-en">Captain Plan Eligibility</span>
+                                        <span class="lang-zh hidden">船長計劃資格</span>
+                                    </h3>
+                                    <p class="text-sm text-gray-600">
+                                        <span class="lang-en">Earn revenue by building your team (2x2x2 matrix)</span>
+                                        <span class="lang-zh hidden">通過建立團隊賺取收入 (2x2x2 矩陣)</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="openPaymentModal()" class="w-full py-6 bg-black text-white rounded-2xl font-black text-xl hover:bg-gray-900 transition-all">
+                            <span class="lang-en">Complete Purchase - $600</span>
+                            <span class="lang-zh hidden">完成購買 - $600</span>
+                        </button>
+                    </div>
+
+                    <!-- Trust Signals -->
+                    <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center p-6 bg-white rounded-2xl border border-gray-200">
+                            <i class="fas fa-shield-alt text-4xl mb-4 text-green-600"></i>
+                            <h3 class="font-bold mb-2">
+                                <span class="lang-en">Secure Payment</span>
+                                <span class="lang-zh hidden">安全付款</span>
+                            </h3>
+                            <p class="text-sm text-gray-600">
+                                <span class="lang-en">256-bit SSL encryption</span>
+                                <span class="lang-zh hidden">256位SSL加密</span>
+                            </p>
+                        </div>
+                        <div class="text-center p-6 bg-white rounded-2xl border border-gray-200">
+                            <i class="fas fa-clock text-4xl mb-4 text-blue-600"></i>
+                            <h3 class="font-bold mb-2">
+                                <span class="lang-en">Instant Access</span>
+                                <span class="lang-zh hidden">即時訪問</span>
+                            </h3>
+                            <p class="text-sm text-gray-600">
+                                <span class="lang-en">Activate immediately after payment</span>
+                                <span class="lang-zh hidden">付款後立即激活</span>
+                            </p>
+                        </div>
+                        <div class="text-center p-6 bg-white rounded-2xl border border-gray-200">
+                            <i class="fas fa-headset text-4xl mb-4 text-purple-600"></i>
+                            <h3 class="font-bold mb-2">
+                                <span class="lang-en">24/7 Support</span>
+                                <span class="lang-zh hidden">24/7 支持</span>
+                            </h3>
+                            <p class="text-sm text-gray-600">
+                                <span class="lang-en">Dedicated support team</span>
+                                <span class="lang-zh hidden">專屬支持團隊</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // [Continue in next part due to length...]
+        
+        function renderCaptainView(container) {
             container.innerHTML = `
                 <div class="max-w-7xl mx-auto">
                     <div class="mb-12">
@@ -1133,15 +1312,6 @@
                         </div>
                     </div>
 
-                    <!-- Action Button -->
-                    <div class="mb-8">
-                        <button onclick="simulateCaptainPlan()" class="px-8 py-4 bg-black text-white rounded-2xl font-bold hover:bg-gray-900 transition-all">
-                            <i class="fas fa-play mr-2"></i>
-                            <span class="lang-en">Simulate Team Building (Demo)</span>
-                            <span class="lang-zh hidden">模擬團隊建設 (演示)</span>
-                        </button>
-                    </div>
-
                     <!-- Teams List -->
                     <div id="teams-container" class="space-y-6">
                         ${captainState.teams.length === 0 ? `
@@ -1168,195 +1338,20 @@
                     <div class="flex items-center justify-between mb-6">
                         <div>
                             <h3 class="text-2xl font-black mb-1">${team.name}</h3>
-                            <p class="text-sm text-gray-500">
-                                Created: ${team.createdDate}
-                                ${team.completed ? ` • Completed: ${team.completedDate}` : ''}
-                            </p>
+                            <p class="text-sm text-gray-500">Created: ${team.createdDate}</p>
                         </div>
                         <div class="px-4 py-2 rounded-full ${team.completed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'} font-bold text-sm">
                             ${team.completed ? 'COMPLETED' : 'FORMING'}
                         </div>
                     </div>
-
-                    <!-- Matrix Structure -->
-                    <div class="grid grid-cols-7 gap-4 mb-6">
-                        ${team.slots.map((slot, index) => renderMatrixNode(slot, index)).join('')}
-                    </div>
-
-                    <!-- Revenue Summary -->
-                    <div class="grid grid-cols-3 gap-4 pt-6 border-t border-gray-200">
-                        <div>
-                            <div class="text-sm text-gray-500 mb-1">Direct Earnings</div>
-                            <div class="text-xl font-bold">$${(team.slots[1]?.subTeams.revenue + team.slots[2]?.subTeams.revenue || 0).toLocaleString()}</div>
-                        </div>
-                        <div>
-                            <div class="text-sm text-gray-500 mb-1">Estimated Royalties</div>
-                            <div class="text-xl font-bold">$${(team.slots[1]?.downlineRevenue + team.slots[2]?.downlineRevenue || 0).toLocaleString()}</div>
-                        </div>
-                        <div>
-                            <div class="text-sm text-gray-500 mb-1">Total Value</div>
-                            <div class="text-2xl font-black">$${((team.slots[1]?.subTeams.revenue + team.slots[2]?.subTeams.revenue || 0) + (team.slots[1]?.downlineRevenue + team.slots[2]?.downlineRevenue || 0)).toLocaleString()}</div>
-                        </div>
+                    <div class="text-center p-8 bg-gray-50 rounded-xl">
+                        <p class="text-sm text-gray-500">Team details will be displayed here</p>
                     </div>
                 </div>
             `;
         }
 
-        function renderMatrixNode(slot, index) {
-            if (!slot) return '';
-            
-            const cols = {
-                0: 'col-span-7',
-                1: 'col-span-3',
-                2: 'col-span-3 col-start-5',
-                3: 'col-span-1 col-start-2',
-                4: 'col-span-1 col-start-3',
-                5: 'col-span-1 col-start-5',
-                6: 'col-span-1 col-start-6'
-            };
-
-            return `
-                <div class="${cols[index]}">
-                    <div class="matrix-node ${slot.filled ? 'filled' : 'empty'}">
-                        <div class="text-xs text-gray-500 mb-2 font-bold">${slot.role}</div>
-                        <div class="text-sm font-bold mb-2">${slot.name || 'Empty'}</div>
-                        ${slot.filled ? `
-                            <div class="text-xs text-gray-600">
-                                <div>Teams: ${slot.subTeams.completed + slot.subTeams.forming}</div>
-                                <div class="font-bold text-green-600">$${(slot.subTeams.revenue + (slot.downlineRevenue || 0)).toLocaleString()}</div>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-        }
-
-        window.simulateCaptainPlan = function() {
-            showToast('Simulating team building...', 'success');
-            
-            setTimeout(() => {
-                createSimulatedTeam('TEAM-001', true);
-                showToast('Team 1 created (Completed)!', 'success');
-                renderCaptainView();
-            }, 500);
-            
-            setTimeout(() => {
-                createSimulatedTeam('TEAM-002', false);
-                showToast('Team 2 created (Forming)!', 'success');
-                renderCaptainView();
-            }, 1500);
-            
-            setTimeout(() => {
-                createSimulatedTeam('TEAM-003', false);
-                showToast('Team 3 created (Forming)!', 'success');
-                renderCaptainView();
-            }, 2500);
-            
-            setTimeout(() => {
-                showToast('✨ Simulation complete! View your teams below.', 'success');
-            }, 3500);
-        };
-
-        function createSimulatedTeam(teamId, isCompleted) {
-            const team = {
-                id: teamId,
-                name: teamId,
-                captain: 'You',
-                slots: [],
-                createdDate: getRandomDate(-30),
-                completedDate: isCompleted ? getRandomDate(-5) : null,
-                completed: isCompleted
-            };
-            
-            team.slots.push({
-                id: 0,
-                role: 'Captain',
-                name: 'You',
-                filled: true,
-                subTeams: { forming: 0, completed: 0, revenue: 0, estimated: 0 }
-            });
-            
-            const a1Revenue = CAPTAIN_CONFIG.packagePrice * CAPTAIN_CONFIG.a1DirectRate;
-            const a1Downline = isCompleted ? CAPTAIN_CONFIG.packagePrice * 7 * CAPTAIN_CONFIG.teamRoyaltyRate : 0;
-            
-            team.slots.push({
-                id: 1,
-                role: 'A1',
-                name: generateRandomName(),
-                filled: true,
-                subTeams: { 
-                    forming: isCompleted ? 0 : 1, 
-                    completed: isCompleted ? 1 : 0,
-                    revenue: a1Revenue,
-                    estimated: isCompleted ? 0 : a1Downline
-                },
-                downlineRevenue: a1Downline
-            });
-            
-            const a2Revenue = CAPTAIN_CONFIG.packagePrice * CAPTAIN_CONFIG.a2DirectRate;
-            const a2Downline = isCompleted ? CAPTAIN_CONFIG.packagePrice * 7 * CAPTAIN_CONFIG.teamRoyaltyRate : 0;
-            
-            team.slots.push({
-                id: 2,
-                role: 'A2',
-                name: generateRandomName(),
-                filled: true,
-                subTeams: { 
-                    forming: isCompleted ? 0 : 1, 
-                    completed: isCompleted ? 1 : 0,
-                    revenue: a2Revenue,
-                    estimated: isCompleted ? 0 : a2Downline
-                },
-                downlineRevenue: a2Downline
-            });
-            
-            for (let i = 1; i <= 4; i++) {
-                team.slots.push({
-                    id: 2 + i,
-                    role: `B${i}`,
-                    name: isCompleted ? generateRandomName() : null,
-                    filled: isCompleted,
-                    subTeams: { forming: 0, completed: 0, revenue: 0, estimated: 0 },
-                    downlineRevenue: 0
-                });
-            }
-            
-            const directEarnings = a1Revenue + a2Revenue;
-            const royaltyEarnings = a1Downline + a2Downline;
-            
-            captainState.teams.push(team);
-            captainState.revenue.direct += directEarnings;
-            captainState.revenue.royalty += royaltyEarnings;
-            captainState.revenue.total += (directEarnings + royaltyEarnings);
-            
-            if (isCompleted) {
-                captainState.totalCompletedTeams++;
-            } else {
-                captainState.totalFormingTeams++;
-            }
-        }
-
-        function generateRandomName() {
-            const firstNames = ['Alex', 'Sam', 'Jordan', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Avery'];
-            const lastNames = ['Chen', 'Wang', 'Li', 'Zhang', 'Liu', 'Yang', 'Huang', 'Wu'];
-            return firstNames[Math.floor(Math.random() * firstNames.length)] + ' ' + 
-                   lastNames[Math.floor(Math.random() * lastNames.length)];
-        }
-
-        function getRandomDate(daysAgo = 0) {
-            const date = new Date();
-            if (daysAgo) {
-                date.setDate(date.getDate() + daysAgo);
-            } else {
-                date.setDate(date.getDate() - Math.floor(Math.random() * 30));
-            }
-            return date.toISOString().split('T')[0];
-        }
-
-        // ==================== WALLET VIEW ====================
-        function renderWalletView() {
-            const container = document.getElementById('content-container');
-            
+        function renderWalletView(container) {
             container.innerHTML = `
                 <div class="max-w-7xl mx-auto">
                     <div class="mb-12">
@@ -1365,13 +1360,13 @@
                             <span class="lang-zh hidden">錢包資產</span>
                         </h1>
                         <p class="text-gray-600 text-lg">
-                            <span class="lang-en">Manage your cryptocurrency and fiat balances.</span>
-                            <span class="lang-zh hidden">管理您的加密貨幣和法幣餘額。</span>
+                            <span class="lang-en">Manage your cryptocurrency balances.</span>
+                            <span class="lang-zh hidden">管理您的加密貨幣餘額。</span>
                         </p>
                     </div>
 
                     <!-- Balance Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-3xl p-8 text-white shadow-xl">
                             <div class="flex items-center justify-between mb-6">
                                 <div>
@@ -1398,65 +1393,11 @@
                             <div class="text-xs opacity-80">≈ $${window.state.balance.usdc.toLocaleString()} USD</div>
                         </div>
                     </div>
-
-                    <!-- Actions -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <button onclick="depositFunds()" class="p-8 bg-white border-2 border-gray-200 rounded-2xl hover:border-black transition-all text-center">
-                            <i class="fas fa-arrow-down text-4xl mb-4 text-green-600"></i>
-                            <h3 class="font-bold text-lg mb-2">
-                                <span class="lang-en">Deposit</span>
-                                <span class="lang-zh hidden">存款</span>
-                            </h3>
-                            <p class="text-sm text-gray-600">
-                                <span class="lang-en">Add funds to your wallet</span>
-                                <span class="lang-zh hidden">向錢包添加資金</span>
-                            </p>
-                        </button>
-
-                        <button onclick="withdrawFunds()" class="p-8 bg-white border-2 border-gray-200 rounded-2xl hover:border-black transition-all text-center">
-                            <i class="fas fa-arrow-up text-4xl mb-4 text-red-600"></i>
-                            <h3 class="font-bold text-lg mb-2">
-                                <span class="lang-en">Withdraw</span>
-                                <span class="lang-zh hidden">提款</span>
-                            </h3>
-                            <p class="text-sm text-gray-600">
-                                <span class="lang-en">Send funds to external wallet</span>
-                                <span class="lang-zh hidden">發送資金到外部錢包</span>
-                            </p>
-                        </button>
-
-                        <button onclick="viewTransactions()" class="p-8 bg-white border-2 border-gray-200 rounded-2xl hover:border-black transition-all text-center">
-                            <i class="fas fa-history text-4xl mb-4 text-blue-600"></i>
-                            <h3 class="font-bold text-lg mb-2">
-                                <span class="lang-en">History</span>
-                                <span class="lang-zh hidden">歷史記錄</span>
-                            </h3>
-                            <p class="text-sm text-gray-600">
-                                <span class="lang-en">View transaction history</span>
-                                <span class="lang-zh hidden">查看交易歷史</span>
-                            </p>
-                        </button>
-                    </div>
                 </div>
             `;
         }
 
-        window.depositFunds = function() {
-            showToast('Deposit feature coming soon!', 'success');
-        };
-
-        window.withdrawFunds = function() {
-            showToast('Withdraw feature coming soon!', 'success');
-        };
-
-        window.viewTransactions = function() {
-            showToast('Transaction history coming soon!', 'success');
-        };
-
-        // ==================== PROFILE VIEW ====================
-        function renderProfileView() {
-            const container = document.getElementById('content-container');
-            
+        function renderProfileView(container) {
             container.innerHTML = `
                 <div class="max-w-4xl mx-auto">
                     <div class="mb-12">
@@ -1545,17 +1486,6 @@
                         </h2>
                         
                         <div class="space-y-4">
-                            <button onclick="changePassword()" class="w-full p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all text-left flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-lock"></i>
-                                    <span class="font-bold">
-                                        <span class="lang-en">Change Password</span>
-                                        <span class="lang-zh hidden">更改密碼</span>
-                                    </span>
-                                </div>
-                                <i class="fas fa-chevron-right text-gray-400"></i>
-                            </button>
-                            
                             <button onclick="logout()" class="w-full p-4 bg-red-50 rounded-xl hover:bg-red-100 transition-all text-left flex items-center justify-between text-red-600">
                                 <div class="flex items-center gap-3">
                                     <i class="fas fa-sign-out-alt"></i>
@@ -1572,38 +1502,7 @@
             `;
         }
 
-        window.copyReferralLink = function() {
-            const link = `${window.location.origin}?ref=${window.state.walletAddress || 'your-id'}`;
-            navigator.clipboard.writeText(link);
-            showToast('Referral link copied!', 'success');
-        };
-
-        window.changePassword = function() {
-            showToast('Password change feature coming soon!', 'success');
-        };
-
-        window.logout = function() {
-            if (confirm('Are you sure you want to logout?')) {
-                window.state = {
-                    lang: window.state.lang,
-                    currentView: 'purchase',
-                    walletAddress: null,
-                    userEmail: null,
-                    privyUser: null,
-                    modules: {},
-                    currentReferralSlot: null,
-                    balance: { usdt: 0, usdc: 0, sol: 0, bnb: 0 }
-                };
-                document.getElementById('app-shell').classList.add('hidden');
-                document.getElementById('login-view').style.display = 'flex';
-                showToast('Logged out successfully', 'success');
-            }
-        };
-
-        // ==================== MODULE VIEWS ====================
-        function renderModuleView(moduleName) {
-            const container = document.getElementById('content-container');
-            
+        function renderModuleView(container, moduleName) {
             const moduleConfig = {
                 hkaifa: {
                     icon: '🎓',
@@ -1670,35 +1569,39 @@
             `;
         }
 
-        // ==================== PAYMENT FUNCTIONS ====================
-        window.selectPayment = function(method) {
-            document.querySelectorAll('.payment-option').forEach(btn => {
-                btn.classList.remove('border-black', 'bg-gray-50');
-                btn.classList.add('border-gray-200');
-            });
-            event.currentTarget.classList.add('border-black', 'bg-gray-50');
-            event.currentTarget.classList.remove('border-gray-200');
-            window.state.selectedPayment = method;
+        // ==================== UTILITY FUNCTIONS ====================
+        window.copyReferralLink = function() {
+            const link = `${window.location.origin}?ref=${window.state.walletAddress || 'your-id'}`;
+            navigator.clipboard.writeText(link);
+            showToast('Referral link copied!', 'success');
         };
 
-        window.processPurchase = function() {
-            if (!window.state.selectedPayment) {
-                showToast('Please select a payment method', 'warning');
-                return;
-            }
+        window.logout = function() {
+            const confirmMsg = window.state.lang === 'en' 
+                ? 'Are you sure you want to logout?'
+                : '確定要登出嗎?';
             
-            showToast('Processing payment...', 'success');
-            
-            setTimeout(() => {
-                showToast('Payment successful! Welcome to AIFID!', 'success');
-                window.state.modules = {
-                    hkaifa: true,
-                    hkaifm: true,
-                    hkaiiff: true,
-                    service: true
+            if (confirm(confirmMsg)) {
+                if (privyClient && privyClient.logout) {
+                    privyClient.logout();
+                }
+                
+                window.state = {
+                    lang: window.state.lang,
+                    currentView: 'purchase',
+                    walletAddress: null,
+                    userEmail: null,
+                    privyUser: null,
+                    modules: {},
+                    currentReferralSlot: null,
+                    balance: { usdt: 0, usdc: 0 },
+                    selectedCrypto: null
                 };
-                switchView('captain');
-            }, 2000);
+                
+                document.getElementById('app-shell').classList.add('hidden');
+                document.getElementById('login-view').style.display = 'flex';
+                showToast('Logged out successfully', 'success');
+            }
         };
 
         // ==================== INITIALIZATION ====================
@@ -1719,6 +1622,7 @@
         console.log('🚀 AIFID System Initialized');
         console.log('📧 Privy App ID:', CONFIG.privyAppId);
         console.log('💾 Supabase Connected:', !!supabase);
+        console.log('🔐 Privy Client:', !!privyClient);
     </script>
 </body>
 </html>
